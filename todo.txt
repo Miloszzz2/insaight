@@ -1,0 +1,18 @@
+1. Dodanie google auth
+2. Pobieranie filmow dla danego konta yt i wyświetlanie ich
+3. Dodawanie do bazy danych danych na temat filmow i komentarzy, aby nie pobierac wiele razy tych samych danych
+4. Pobieranie komentarzy dla wybranego filmu
+5. Dodanie synchronizacji danych po wcisnieciu przycisku
+6. Wysłanie komentarzy do Google Gemini API z prosba o pogrupowanie komentarzy w kategorie i zwrot informacji w formacie JSON
+7. Wyświetlanie group na podstawie outputu 
+(8.) Dodanie płatności z uzyciem stripe 
+9. Analiza sentymentu komentarzu
+10. Ogólne AI summary odnosnie komentarzy lub konkretnej kategorii
+11. Dodanie funkcjonalnośći do pobieranie określonej liczby filmów np. 20 ostatnich
+
+Tech stack:
+- firebase
+- gemini api 
+- next.js 
+- google cloud
+- (stripe)

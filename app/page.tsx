@@ -129,8 +129,8 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="bg-white border-0">
-                <CardContent className="p-6 text-center">
+              <Card key={index} className="bg-white border border-neutral-200 shadow-sm">
+                <CardContent className="p-6 text-center ">
                   <div className="text-4xl mb-4">{feature.icon}</div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
@@ -151,7 +151,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white border-0 shadow-sm">
+              <Card key={index} className="bg-white border shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     {[...Array(5)].map((_, i) => (
