@@ -19,6 +19,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Play, Eye, Calendar, BarChart3, LogOut } from "lucide-react"
+import SignOutButton from "@/components/ui/signout-button"
 
 function AppSidebar() {
   return (
@@ -73,12 +74,9 @@ function AppSidebar() {
         </SidebarGroup>
         <SidebarMenu className="px-3">
           <SidebarMenuItem>
-            <Link href="/">
-              <SidebarMenuButton>
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </SidebarMenuButton>
-            </Link>
+
+            <SignOutButton />
+
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

@@ -1,4 +1,7 @@
-1. Dodanie google auth
+Done:
+1. Dodanie google auth 
+
+
 2. Pobieranie filmow dla danego konta yt i wyświetlanie ich
 3. Dodawanie do bazy danych danych na temat filmow i komentarzy, aby nie pobierac wiele razy tych samych danych
 4. Pobieranie komentarzy dla wybranego filmu
