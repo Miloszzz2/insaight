@@ -19,7 +19,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Play, Eye, Calendar, BarChart3, LogOut } from "lucide-react"
-import SignOutButton from "@/components/ui/signout-button"
+import signOut from "./actions"
 
 function AppSidebar() {
   return (
@@ -29,10 +29,7 @@ function AppSidebar() {
           <h1 className="text-xl font-bold text-violet-600">InsAight</h1>
         </div>
       </SidebarHeader>
-
       <SidebarContent>
-
-
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -74,13 +71,17 @@ function AppSidebar() {
         </SidebarGroup>
         <SidebarMenu className="px-3">
           <SidebarMenuItem>
-
-            <SignOutButton />
+            <form action={signOut}>
+              <SidebarMenuButton>
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </SidebarMenuButton>
+            </form>
 
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   )
 }
 
