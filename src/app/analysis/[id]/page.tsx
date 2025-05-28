@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/src/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
+import { Badge } from "@/src/components/ui/badge"
+import { Progress } from "@/src/components/ui/progress"
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/src/components/ui/sidebar"
 import {
   ArrowLeft,
   ThumbsUp,
@@ -31,7 +31,7 @@ import {
   Music,
   MessageCircle,
 } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/src/components/ui/input"
 
 function AnalysisSidebar() {
   const categories = [

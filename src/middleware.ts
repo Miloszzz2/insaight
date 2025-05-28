@@ -3,9 +3,9 @@ import { getAuthenticatedAppForUser } from "./utils/firebase/server-app";
 
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
-
+    console.log(pathname)
     // Allow public routes
-    if (pathname.startsWith("/auth") && pathname != '/') {
+    if (pathname.startsWith("/auth") || pathname === "/") {
         return NextResponse.next();
     }
 

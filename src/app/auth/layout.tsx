@@ -1,8 +1,7 @@
 import { getAuthenticatedAppForUser } from "@/utils/firebase/server-app";
 import Link from "next/link";
 import AuthCard from "@/components/ui/auth-card";
-import { redirect } from "next/navigation";
-import { User } from "firebase/auth";
+
 export default async function AuthLayout({ children }: {
     children: React.ReactNode
 }) {

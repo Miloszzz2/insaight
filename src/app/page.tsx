@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
+import Image from "next/image"
 
 export default function LandingPage() {
   const features = [
@@ -93,9 +94,11 @@ export default function LandingPage() {
             {/* Hero Image */}
             <div className="relative">
               <div className="bg-gradient-to-br from-violet-100 to-purple-100 rounded-2xl p-8">
-                <img
+                <Image
                   src="/hero.png"
                   alt="YouTube Comment Analysis Dashboard"
+                  width={600} // set appropriate width
+                  height={400} // set appropriate height
                   className="w-full h-auto rounded-lg shadow-lg"
                 />
               </div>
