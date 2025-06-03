@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const LOGIN_PATH = "/auth"
+
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,
@@ -27,8 +29,27 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // refreshing the auth token
-    await supabase.auth.getUser()
+    // Fetch the current authenticated user
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    return supabaseResponse
+    const path = request.nextUrl.pathname;
+
+    // Redirect unauthenticated users to login, except for auth routes
+    if (!user && !path.startsWith("/auth") && path !== "/") {
+        const url = request.nextUrl.clone();
+        url.pathname = LOGIN_PATH;
+        url.searchParams.set("next", path);
+        return NextResponse.redirect(url);
+    }
+
+    // Prevent authenticated users from accessing the login page
+    if (user && path.startsWith(LOGIN_PATH)) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+    }
+
+    return supabaseResponse;
 }

@@ -1,10 +1,10 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Noto_Sans, Outfit, Roboto } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "sonner"
 
-const inter = Inter({ subsets: ["latin"] })
+const poppins = Outfit({ weight: "600" })
 
 export const metadata: Metadata = {
   title: "InsAight - AI-Powered YouTube Comment Analysis",
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={poppins.className}>
         {children}
         <Toaster richColors />
       </body>
