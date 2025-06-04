@@ -1,11 +1,11 @@
+"use server";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+async function getChannelDetails() {
 	const supabase = await createClient();
 	const session = supabase.auth.getSession();
 	const token = (await session).data.session?.provider_token;
-
 	try {
 		const channelDetailsData = await fetch(
 			`https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2CcontentDetails%2Cstatistics&mine=true&key=${process.env.YOUTUBE_API_KEY}`,
@@ -16,6 +16,7 @@ export async function GET() {
 			}
 		);
 		const channelDetails = await channelDetailsData.json();
+		console.log(channelDetails);
 		return NextResponse.json(channelDetails);
 	} catch (error) {
 		console.error("Error fetching channelId:", error);
@@ -31,5 +32,32 @@ export async function GET() {
 				},
 			}
 		);
+	}
+}
+
+export async function upsertUser(user: {
+	id: string;
+	email: string;
+	name: string;
+	avatar_url: string;
+	created_at: string;
+}) {
+	const supabase = await createClient();
+	const channelDetails = await getChannelDetails();
+	const channelDetailsJson = await channelDetails?.json();
+	const uploadPlaylistId = channelDetailsJson.items[0].id;
+	const name = channelDetailsJson.items[0].snippet.title;
+	const { error: upsertUsersError } = await supabase.from("users").upsert({
+		id: user.id,
+		email: user.email,
+		name: name,
+		avatar_url: user.avatar_url,
+		created_at: user.created_at,
+		upload_playlist_id: uploadPlaylistId,
+	});
+
+	if (upsertUsersError) {
+		console.error("Error upserting user:", upsertUsersError);
+		throw upsertUsersError;
 	}
 }

@@ -1,21 +1,21 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { GoogleGenAI } from "@google/genai"
-import { CategorizationResult } from "@/types/api/ai/categorize"
-import { Comment } from "@/types/db/comment"
-import { Category, CommentGroup } from "@/types/db/comment-group"
-import { createClient } from "@/utils/supabase/server"
-import { randomUUID } from "crypto"
+import { type NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
+import { CategorizationResult } from "@/types/api/ai/categorize";
+import { Comment } from "@/types/db/comment";
+import { Category, CommentGroup } from "@/types/db/comment-group";
+import { createClient } from "@/utils/supabase/server";
+import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest) {
-   try {
-      const { comments }: { comments: Comment[] } = await request.json()
-      if (!process.env.GEMINI_API_KEY) {
-         throw new Error("GEMINI_API_KEY environment variable is required")
-      }
+	try {
+		const { comments }: { comments: Comment[] } = await request.json();
+		if (!process.env.GEMINI_API_KEY) {
+			throw new Error("GEMINI_API_KEY environment variable is required");
+		}
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
-      console.log(comments.length)
-      const prompt = `
+		const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+		console.log(comments.length);
+		const prompt = `
          Analyze the following YouTube comments and perform these tasks:
 
          1. **Identify natural categories** - Based on the content and themes of the comments, create meaningful categories that best represent the different types of feedback/topics discussed. Don't use predefined categories - let the data guide you.
@@ -38,7 +38,12 @@ export async function POST(request: NextRequest) {
          - Note any interesting patterns or trends
 
          Comments to analyze:
-         ${comments.map((comment: Comment, index: number) => `${index + 1}. "${comment.text}"`).join("\n")}
+         ${comments
+				.map(
+					(comment: Comment, index: number) =>
+						`${index + 1}. "${comment.text}"`
+				)
+				.join("\n")}
 
          Return your analysis as a JSON object with this exact structure:
          {
@@ -76,111 +81,153 @@ export async function POST(request: NextRequest) {
          }
 
          Return ONLY the JSON object, no other text.
-            `
+            `;
 
-      const response = await ai.models.generateContent({
-         model: 'gemini-2.0-flash',
-         contents: prompt,
-         config: {
-            responseMimeType: 'application/json'
-         }
-      })
+		const response = await ai.models.generateContent({
+			model: "gemini-2.0-flash",
+			contents: prompt,
+			config: {
+				responseMimeType: "application/json",
+			},
+		});
 
-      const jsonText = response.text
-      const result = JSON.parse(jsonText || "{}")
+		const jsonText = response.text;
+		const result = JSON.parse(jsonText || "{}");
 
-      const validatedResult: CategorizationResult = {
-         categories: result.categories?.map((cat: Category, index: number): CommentGroup => ({
-            id: randomUUID(),
-            video_id: comments[index].video_id,
-            created_at: comments[index].created_at,
-            name: cat.name || 'Unknown',
-            description: cat.description || 'No description',
-            count: cat.count || 0,
-            icon: cat.icon || 'MessageCircle',
+		const validatedResult: CategorizationResult = {
+			categories:
+				result.categories?.map(
+					(cat: Category, index: number): CommentGroup => ({
+						id: randomUUID(),
+						video_id: comments[index].video_id,
+						created_at: comments[index].created_at,
+						name: cat.name || "Unknown",
+						description: cat.description || "No description",
+						count: cat.count || 0,
+						icon: cat.icon || "MessageCircle",
+					})
+				) || [],
+			comments:
+				result.comments?.map(
+					(
+						comment: {
+							category: string;
+							sentiment: "positive" | "negative" | "neutral";
+						},
+						index: number
+					): Comment => ({
+						id: comments[index]?.id || `comment_${index}`,
+						youtube_comment_id: comments[index]?.youtube_comment_id,
+						video_id: comments[index]?.video_id || "",
+						author_name: comments[index]?.author_name || "Unknown",
+						text: comments[index]?.text || "",
+						sentiment:
+							comment.sentiment ||
+							comments[index]?.sentiment ||
+							"neutral",
+						created_at: comments[index]?.created_at || "",
+						avatar: comments[index]?.avatar || "",
+						likes: comments[index]?.likes || 0,
+						category: comment.category || "uncategorized",
+					})
+				) || [],
+			overallSummary: {
+				sentiment: {
+					overall: result.overallSummary?.sentiment?.overall || "neutral",
+					positive: result.overallSummary?.sentiment?.positive || 0,
+					negative: result.overallSummary?.sentiment?.negative || 0,
+					neutral: result.overallSummary?.sentiment?.neutral || 0,
+				},
+				keyThemes: result.overallSummary?.keyThemes || [],
+				engagement: {
+					level: result.overallSummary?.engagement?.level || "medium",
+					description:
+						result.overallSummary?.engagement?.description ||
+						"Standard engagement level",
+				},
+				mainTakeaways:
+					result.overallSummary?.mainTakeaways ||
+					"No main takeaways available",
+				recommendations:
+					result.overallSummary?.recommendations ||
+					"No recommendations available",
+			},
+		};
 
-         })) || [],
-         comments: result.comments?.map((comment: { category: string, sentiment: "positive" | "negative" | "neutral" }, index: number): Comment => ({
-            id: comments[index]?.id || `comment_${index}`,
-            youtube_comment_id: comments[index]?.youtube_comment_id,
-            video_id: comments[index]?.video_id || '',
-            author_name: comments[index]?.author_name || 'Unknown',
-            text: comments[index]?.text || '',
-            sentiment: comment.sentiment || comments[index]?.sentiment || 'neutral',
-            created_at: comments[index]?.created_at || '',
-            avatar: comments[index]?.avatar || '',
-            likes: comments[index]?.likes || 0,
-            category: comment.category || 'uncategorized',
-         })) || [],
-         overallSummary: {
-            sentiment: {
-               overall: result.overallSummary?.sentiment?.overall || 'neutral',
-               positive: result.overallSummary?.sentiment?.positive || 0,
-               negative: result.overallSummary?.sentiment?.negative || 0,
-               neutral: result.overallSummary?.sentiment?.neutral || 0
-            },
-            keyThemes: result.overallSummary?.keyThemes || [],
-            engagement: {
-               level: result.overallSummary?.engagement?.level || 'medium',
-               description: result.overallSummary?.engagement?.description || 'Standard engagement level'
-            },
-            mainTakeaways: result.overallSummary?.mainTakeaways || 'No main takeaways available',
-            recommendations: result.overallSummary?.recommendations || 'No recommendations available'
-         }
-      };
+		const supabase = await createClient();
 
-      const supabase = await createClient();
+		const { error } = await supabase
+			.from("comments")
+			.upsert(validatedResult.comments, {
+				onConflict: "youtube_comment_id",
+				ignoreDuplicates: true,
+			});
 
-      const { error } = await supabase
-         .from("comments")
-         .upsert(validatedResult.comments, { onConflict: "youtube_comment_id", ignoreDuplicates: true });
+		const { count: commentGroupsCount, error: selectCommentGroupsError } =
+			await supabase
+				.from("comment_groups")
+				.select("*", { count: "exact", head: true })
+				.eq("video_id", comments[0]?.video_id);
 
-      const { count, error: fetchError } = await supabase
-         .from("comment_groups")
-         .select('*', { count: 'exact', head: true })
-         .eq("video_id", comments[0]?.video_id)
+		console.log(commentGroupsCount);
 
-      console.log(count)
+		if (selectCommentGroupsError) {
+			console.error(
+				"Error checking existing comment group:",
+				selectCommentGroupsError
+			);
+			return NextResponse.json(
+				{
+					error: "Failed to check existing comment group",
+					details: selectCommentGroupsError.message,
+				},
+				{ status: 500 }
+			);
+		}
 
-      if (fetchError) {
-         console.error("Error checking existing comment group:", fetchError);
-         return NextResponse.json({ error: "Failed to check existing comment group", details: fetchError.message }, { status: 500 });
-      }
+		if (commentGroupsCount == 0) {
+			const { error: insertError } = await supabase
+				.from("comment_groups")
+				.insert(validatedResult.categories);
 
-      if (count == 0) {
-         const { error: insertError } = await supabase
-            .from("comment_groups")
-            .insert(validatedResult.categories);
+			if (insertError) {
+				console.error("Error inserting comment groups:", insertError);
+				return NextResponse.json(
+					{
+						error: "Failed to insert comment groups",
+						details: insertError.message,
+					},
+					{ status: 500 }
+				);
+			}
+		}
 
-         if (insertError) {
-            console.error("Error inserting comment groups:", insertError);
-            return NextResponse.json({ error: "Failed to insert comment groups", details: insertError.message }, { status: 500 });
-         }
-      }
+		if (error) {
+			console.error("Error upserting comments:", error);
+			return NextResponse.json(
+				{ error: "Failed to upsert comments", details: error?.message },
+				{ status: 500 }
+			);
+		}
 
-      if (error) {
-         console.error("Error upserting comments:", error);
-         return NextResponse.json({ error: "Failed to upsert comments", details: error?.message }, { status: 500 });
-      }
-
-      return NextResponse.json(validatedResult, {
-         headers: {
-            'Content-Type': 'application/json',
-         }
-      })
-   } catch (error) {
-      console.error("Error analyzing comments:", error)
-      return NextResponse.json(
-         {
-            error: "Failed to analyze comments",
-            details: error instanceof Error ? error.message : "Unknown error"
-         },
-         {
-            status: 500,
-            headers: {
-               'Content-Type': 'application/json'
-            }
-         }
-      )
-   }
+		return NextResponse.json(validatedResult, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	} catch (error) {
+		console.error("Error analyzing comments:", error);
+		return NextResponse.json(
+			{
+				error: "Failed to analyze comments",
+				details: error instanceof Error ? error.message : "Unknown error",
+			},
+			{
+				status: 500,
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+	}
 }
