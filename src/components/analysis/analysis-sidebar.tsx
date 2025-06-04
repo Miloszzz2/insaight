@@ -1,3 +1,4 @@
+"use client";
 import {
 	Sidebar,
 	SidebarHeader,
@@ -13,19 +14,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-import { Category } from "@/types/db/comment-group";
-
-import { Film, Lightbulb, Mic, Music, MessageCircle } from "lucide-react";
+import { CommentGroup } from "@/types/db/comment-group";
 
 import { DynamicIcon } from "@/utils/analysis/dynamic-icon";
 
-export function AnalysisSidebar({
-	categories,
-	isAnalyzed,
-}: {
-	categories: Category[];
-	isAnalyzed: boolean;
-}) {
+import { Film, Lightbulb, Mic, Music, MessageCircle } from "lucide-react";
+import Link from "next/link";
+
+import { useAnalysis } from "@/app/analysis/[id]/context/analysis-context-provider";
+
+export function AnalysisSidebar() {
+	const { isAnalyzed, analysisData } = useAnalysis();
+
 	const categoryConfig = [
 		{
 			id: "editing",
@@ -108,40 +108,48 @@ export function AnalysisSidebar({
 									);
 								})}
 							{isAnalyzed &&
-								categories.map((category: Category) => {
-									return (
-										<SidebarMenuItem key={category.name}>
-											<SidebarMenuButton
-												disabled={!isAnalyzed}
-												className="h-12 flex justify-between items-center"
-											>
-												<div className="flex items-center gap-2">
-													<DynamicIcon
-														name={category.icon}
-														className="w-4 h-4 text-gray-600"
-													/>
-													<span
-														className={
-															!isAnalyzed ? "text-gray-400" : ""
-														}
-													>
-														{category.name}
-													</span>
-												</div>
-												<Badge
-													variant="secondary"
-													className={`ml-auto ${
-														isAnalyzed
-															? "bg-violet-100 text-violet-700"
-															: "bg-gray-100 text-gray-600"
-													}`}
+								analysisData.categories.map(
+									(category: CommentGroup) => {
+										return (
+											<SidebarMenuItem key={category.name}>
+												<Link
+													href={`/analysis/${category.video_youtube_id}/${category.id}`}
 												>
-													{category.count}
-												</Badge>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									);
-								})}
+													<SidebarMenuButton
+														disabled={!isAnalyzed}
+														className="h-12 flex justify-between items-center"
+													>
+														<div className="flex items-center gap-2">
+															<DynamicIcon
+																name={category.icon}
+																className="w-4 h-4 text-gray-600"
+															/>
+															<span
+																className={
+																	!isAnalyzed
+																		? "text-gray-400"
+																		: ""
+																}
+															>
+																{category.name}
+															</span>
+														</div>
+														<Badge
+															variant="secondary"
+															className={`ml-auto ${
+																isAnalyzed
+																	? "bg-violet-100 text-violet-700"
+																	: "bg-gray-100 text-gray-600"
+															}`}
+														>
+															{category.count}
+														</Badge>
+													</SidebarMenuButton>
+												</Link>
+											</SidebarMenuItem>
+										);
+									}
+								)}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>

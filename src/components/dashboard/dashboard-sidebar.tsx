@@ -21,8 +21,11 @@ import {
 import { Play, BarChart3, LogOut } from "lucide-react";
 
 import signOut from "@/app/dashboard/actions/sign-out";
+import { createClient } from "@/utils/supabase/server";
 
-export default function AppSidebar() {
+export default async function AppSidebar() {
+	const supabase = await createClient();
+	const user = (await supabase.auth.getUser()).data.user;
 	return (
 		<Sidebar>
 			<SidebarHeader>
@@ -60,7 +63,9 @@ export default function AppSidebar() {
 								<SidebarMenuButton>
 									<div className="flex items-center space-x-3">
 										<Avatar className="w-10 h-10">
-											<AvatarImage src="/placeholder.svg?height=40&width=40" />
+											<AvatarImage
+												src={user?.user_metadata.avatar_url}
+											/>
 											<AvatarFallback>SC</AvatarFallback>
 										</Avatar>
 										<div>
@@ -75,7 +80,7 @@ export default function AppSidebar() {
 								</SidebarMenuButton>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent side="top" className="w-[230px]">
-								<DropdownMenuItem className="w-full">
+								<DropdownMenuItem className="w-full h-full">
 									<form action={signOut} className="w-full">
 										<SidebarMenuButton>
 											<LogOut className="w-4 h-4" />

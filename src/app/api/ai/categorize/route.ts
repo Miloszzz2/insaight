@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-		console.log(comments.length);
+
 		const prompt = `
          Analyze the following YouTube comments and perform these tasks:
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
          - If comments are very diverse, create broader categories
          - If comments cluster around specific themes, create specific categories
          - Provide reasoning for each comment assignment
-         - For each category, assign an appropriate Lucide React icon name that visually represents the category theme
+			- For each category, assign an appropriate Lucide React icon name that visually represents the category theme
          - Use only valid Lucide React icon names (e.g., "Heart", "MessageCircle", "ThumbsUp", "Star", "Users", "Video", "Music", "Settings", "Lightbulb", "Target", "TrendingUp", "Camera", "Mic", "Edit", "Play", "Volume2", "Smile", "AlertCircle", "CheckCircle", "Info", "Award", "Bookmark", "Clock", "Eye", "Globe", "Home", "Search", "Send", "Share", "Tool", "Zap", etc.)
          - Analyze overall sentiment of comment; pay attention to emojis (positive, negative, neutral)
          - Identify key themes and topics discussed
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
          ],
          "comments": [
             {
-               "category": "assigned_category_name",
+               "category_name": "assigned category name",
                "sentiment": "positive" | "negative" | "neutral"
             }
          ],
@@ -94,24 +94,44 @@ export async function POST(request: NextRequest) {
 		const jsonText = response.text;
 		const result = JSON.parse(jsonText || "{}");
 
+		const categoryNameToId: Record<string, string> = {};
+
+		result.categories.forEach((cat: any) => {
+			const uuid = randomUUID();
+			categoryNameToId[cat.name] = uuid;
+		});
+		const categoryCommentCounts: Record<string, number> = {};
+
+		result.comments?.forEach(
+			(comment: {
+				category_name: string;
+				sentiment: "positive" | "negative" | "neutral";
+			}) => {
+				const catName = comment.category_name;
+				categoryCommentCounts[catName] =
+					(categoryCommentCounts[catName] || 0) + 1;
+			}
+		);
+
 		const validatedResult: CategorizationResult = {
 			categories:
 				result.categories?.map(
-					(cat: Category, index: number): CommentGroup => ({
-						id: randomUUID(),
+					(cat: any, index: number): CommentGroup => ({
+						id: categoryNameToId[cat.name],
 						video_id: comments[index].video_id,
 						created_at: comments[index].created_at,
 						name: cat.name || "Unknown",
 						description: cat.description || "No description",
-						count: cat.count || 0,
+						count: categoryCommentCounts[cat.name],
 						icon: cat.icon || "MessageCircle",
+						video_youtube_id: comments[index].video_youtube_id,
 					})
 				) || [],
 			comments:
 				result.comments?.map(
 					(
 						comment: {
-							category: string;
+							category_name: string;
 							sentiment: "positive" | "negative" | "neutral";
 						},
 						index: number
@@ -128,7 +148,8 @@ export async function POST(request: NextRequest) {
 						created_at: comments[index]?.created_at || "",
 						avatar: comments[index]?.avatar || "",
 						likes: comments[index]?.likes || 0,
-						category: comment.category || "uncategorized",
+						category_id: categoryNameToId[comment.category_name],
+						video_youtube_id: comments[index].video_youtube_id,
 					})
 				) || [],
 			overallSummary: {
@@ -154,62 +175,46 @@ export async function POST(request: NextRequest) {
 			},
 		};
 
+		console.log(validatedResult.categories);
+
 		const supabase = await createClient();
 
-		const { error } = await supabase
-			.from("comments")
-			.upsert(validatedResult.comments, {
-				onConflict: "youtube_comment_id",
+		const { error: insertError } = await supabase
+			.from("comment_groups")
+			.upsert(validatedResult.categories, {
+				onConflict: "id",
 				ignoreDuplicates: true,
 			});
 
-		const { count: commentGroupsCount, error: selectCommentGroupsError } =
-			await supabase
-				.from("comment_groups")
-				.select("*", { count: "exact", head: true })
-				.eq("video_id", comments[0]?.video_id);
-
-		console.log(commentGroupsCount);
-
-		if (selectCommentGroupsError) {
-			console.error(
-				"Error checking existing comment group:",
-				selectCommentGroupsError
-			);
+		if (insertError) {
+			console.error("Error inserting comment groups:", insertError);
 			return NextResponse.json(
 				{
-					error: "Failed to check existing comment group",
-					details: selectCommentGroupsError.message,
+					error: "Failed to insert comment groups",
+					details: insertError.message,
 				},
 				{ status: 500 }
 			);
 		}
 
-		if (commentGroupsCount == 0) {
-			const { error: insertError } = await supabase
-				.from("comment_groups")
-				.insert(validatedResult.categories);
+		//Upserting comments
+		const { error: commentsUpsertError } = await supabase
+			.from("comments")
+			.upsert(validatedResult.comments, {
+				onConflict: "youtube_comment_id",
+				ignoreDuplicates: false,
+			});
 
-			if (insertError) {
-				console.error("Error inserting comment groups:", insertError);
-				return NextResponse.json(
-					{
-						error: "Failed to insert comment groups",
-						details: insertError.message,
-					},
-					{ status: 500 }
-				);
-			}
-		}
-
-		if (error) {
-			console.error("Error upserting comments:", error);
+		if (commentsUpsertError) {
+			console.error("Error upserting comments:", commentsUpsertError);
 			return NextResponse.json(
-				{ error: "Failed to upsert comments", details: error?.message },
+				{
+					error: "Failed to upsert comments",
+					details: commentsUpsertError?.message,
+				},
 				{ status: 500 }
 			);
 		}
-
 		return NextResponse.json(validatedResult, {
 			headers: {
 				"Content-Type": "application/json",

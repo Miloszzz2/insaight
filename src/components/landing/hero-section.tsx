@@ -48,7 +48,7 @@ export function HeroSection() {
 						<h1 className="text-xl font-bold text-white">InsAight</h1>
 					</div>
 
-					<div className="hidden md:flex items-center space-x-6 animate-slide-in-down">
+					<div className="hidden md:flex items-center space-x-6 animate-slide-in-down text-md">
 						<Link
 							href="#features"
 							className="text-white/80 hover:text-white transition-all duration-300 hover:scale-105"
@@ -71,12 +71,12 @@ export function HeroSection() {
 
 					<div className="flex items-center space-x-4 animate-slide-in-right">
 						<div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-							<Youtube className="w-4 h-4 text-white" />
-							<Twitter className="w-4 h-4 text-white" />
-							<Instagram className="w-4 h-4 text-white" />
+							<Youtube className="w-5 h-5 text-white" />
+							<Twitter className="w-5 h-5 text-white" />
+							<Instagram className="w-5 h-5 text-white" />
 						</div>
 						<Link href="/auth">
-							<Button className="bg-white text-violet-900 hover:bg-gray-100 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+							<Button className="text-md bg-white text-violet-900 hover:bg-gray-100 transition-all duration-300 hover:scale-105 hover:shadow-lg">
 								Get Started
 							</Button>
 						</Link>

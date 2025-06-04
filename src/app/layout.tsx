@@ -1,11 +1,11 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
 // TODO add better font
-const poppins = Outfit({ weight: "600" });
+const publicSans = Public_Sans({ weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
 	title: "InsAight - AI-Powered YouTube Comment Analysis",
@@ -19,8 +19,8 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="en">
-			<body className={poppins.className}>
+		<html lang="en" className="antialiased">
+			<body className={publicSans.className}>
 				{children}
 				<Toaster richColors />
 			</body>

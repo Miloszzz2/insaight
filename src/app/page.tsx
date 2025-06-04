@@ -57,9 +57,9 @@ export default function LandingPage() {
 							>
 								<CardContent className="p-6 text-center ">
 									<div className="text-4xl mb-4">{feature.icon}</div>
-									<h3 className="text-lg font-semibold text-gray-900 mb-2">
+									<h1 className="font-semibold text-gray-900 mb-2 text-xl">
 										{feature.title}
-									</h3>
+									</h1>
 									<p className="text-gray-600">
 										{feature.description}
 									</p>

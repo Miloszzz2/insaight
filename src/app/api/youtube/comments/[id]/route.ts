@@ -1,21 +1,22 @@
 import { Comment } from "@/types/db/comment";
-
 import { createClient } from "@/utils/supabase/server";
-
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET({ params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+	request: Request,
+	{ params }: { params: Promise<{ id: string }> }
+) {
 	try {
 		const { id } = await params;
 
 		const supabase = await createClient();
 
-		const commentsThreads = await fetch(
+		const commentsThreadsData = await fetch(
 			`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${id}&key=${process.env.YOUTUBE_API_KEY}&maxResults=50&order=relevance&textFormat=plainText`
 		);
 
-		if (!commentsThreads.ok) {
+		if (!commentsThreadsData.ok) {
 			throw new Error("Failed to fetch from YouTube API");
 		}
 
@@ -24,9 +25,9 @@ export async function GET({ params }: { params: Promise<{ id: string }> }) {
 			.select("id")
 			.eq("youtube_id", id);
 
-		const commentThreadsJson = await commentsThreads.json();
+		const data = await commentsThreadsData.json();
 
-		const comments: Comment[] = commentThreadsJson.items.map(
+		const comments: Comment[] = data.items.map(
 			(item: any): Comment => ({
 				id: randomUUID(),
 				youtube_comment_id: item.id,
@@ -42,7 +43,8 @@ export async function GET({ params }: { params: Promise<{ id: string }> }) {
 					.replace("Z", ""),
 				avatar: item.snippet.topLevelComment.snippet.authorProfileImageUrl,
 				likes: item.snippet.topLevelComment.snippet.likeCount,
-				category: "Unmatched",
+				category_id: "Unmatched",
+				video_youtube_id: id,
 			})
 		);
 

@@ -1,7 +1,5 @@
 export async function fetchComments(videoId: string) {
-	const commentsData = await fetch(
-		`/api/youtube/comments/${videoId}?refetchFromApi=true`
-	);
+	const commentsData = await fetch(`/api/youtube/comments/${videoId}`);
 	if (!commentsData.ok) {
 		const text = await commentsData.text();
 		console.error("Error response:", text);
