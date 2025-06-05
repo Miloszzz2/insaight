@@ -26,7 +26,6 @@ export async function GET(request: Request) {
 				await upsertUser({
 					id: user.id,
 					email: user.email ?? "",
-					name: user.user_metadata.display_name,
 					avatar_url: user.user_metadata.avatar_url,
 					created_at: user.created_at,
 				});

@@ -192,7 +192,7 @@ export default function AnalysisPage() {
 									<div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
 										<Film className="w-4 h-4 text-violet-600" />
 									</div>
-									<span className="text-md font-semibold">
+									<span className="text-md font-medium">
 										Comment Categories
 									</span>
 								</div>
@@ -200,7 +200,7 @@ export default function AnalysisPage() {
 									<div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
 										<Brain className="w-4 h-4 text-blue-600" />
 									</div>
-									<span className="text-md font-semibold">
+									<span className="text-md font-medium">
 										AI-Generated Summary
 									</span>
 								</div>
@@ -208,7 +208,7 @@ export default function AnalysisPage() {
 									<div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
 										<Lightbulb className="w-4 h-4 text-orange-600" />
 									</div>
-									<span className="text-md font-semibold">
+									<span className="text-md font-medium">
 										Actionable Insights
 									</span>
 								</div>

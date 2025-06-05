@@ -25,7 +25,17 @@ import { createClient } from "@/utils/supabase/server";
 
 export default async function AppSidebar() {
 	const supabase = await createClient();
-	const user = (await supabase.auth.getUser()).data.user;
+	const authUser = (await supabase.auth.getUser()).data.user;
+
+	if (!authUser?.id) return;
+
+	const { data: dbUser } = await supabase
+		.from("users")
+		.select()
+		.eq("id", authUser?.id)
+		.limit(1)
+		.single();
+
 	return (
 		<Sidebar>
 			<SidebarHeader>
@@ -64,16 +74,16 @@ export default async function AppSidebar() {
 									<div className="flex items-center space-x-3">
 										<Avatar className="w-10 h-10">
 											<AvatarImage
-												src={user?.user_metadata.avatar_url}
+												src={dbUser?.avatar_url as string}
 											/>
 											<AvatarFallback>SC</AvatarFallback>
 										</Avatar>
 										<div>
 											<div className="font-medium text-gray-900">
-												Sarah Chen
+												{dbUser?.name}
 											</div>
 											<div className="text-sm text-gray-600">
-												@sarahcreates
+												{dbUser?.username}
 											</div>
 										</div>
 									</div>

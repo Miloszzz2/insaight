@@ -17,46 +17,50 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { CommentGroup } from "@/types/db/comment-group";
 
 import { DynamicIcon } from "@/utils/analysis/dynamic-icon";
+import { createClient } from "@/utils/supabase/client";
 
 import { Film, Lightbulb, Mic, Music, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { useAnalysis } from "@/app/analysis/[id]/context/analysis-context-provider";
+import { categoryConfig } from "@/utils/dashboard/category-config";
 
 export function AnalysisSidebar() {
+	const [user, setUser] = useState<{
+		name: string | null | undefined;
+		username: string | null | undefined;
+		avatar_url: string | null | undefined;
+	}>();
 	const { isAnalyzed, analysisData } = useAnalysis();
+	const supabase = createClient();
+	const getProfile = useCallback(async () => {
+		try {
+			const authUser = (await supabase.auth.getUser()).data.user;
+			if (!authUser?.id) {
+				throw Error;
+			}
+			const { data: dbUser } = await supabase
+				.from("users")
+				.select()
+				.eq("id", authUser?.id)
+				.limit(1)
+				.single();
 
-	const categoryConfig = [
-		{
-			id: "editing",
-			name: "Montage / Editing",
-			icon: Film,
-			count: 0,
-			active: true,
-		},
-		{
-			id: "suggestions",
-			name: "Future Video Ideas",
-			icon: Lightbulb,
-			count: 0,
-			active: false,
-		},
-		{ id: "host", name: "Host Feedback", icon: Mic, count: 0, active: false },
-		{
-			id: "sound",
-			name: "Sound / Music",
-			icon: Music,
-			count: 0,
-			active: false,
-		},
-		{
-			id: "general",
-			name: "General Impressions",
-			icon: MessageCircle,
-			count: 0,
-			active: false,
-		},
-	];
+			setUser({
+				name: dbUser?.name,
+				username: dbUser?.username,
+				avatar_url: dbUser?.avatar_url,
+			});
+		} catch (error: any) {
+			toast.error(error.toString());
+		}
+	}, [user]);
+
+	useEffect(() => {
+		getProfile();
+	}, [user, getProfile]);
 
 	return (
 		<Sidebar>
@@ -159,14 +163,16 @@ export function AnalysisSidebar() {
 				<div className="px-2 py-2">
 					<div className="flex items-center space-x-3">
 						<Avatar className="w-8 h-8">
-							<AvatarImage src="/placeholder.svg?height=32&width=32" />
+							<AvatarImage src={user?.avatar_url as string} />
 							<AvatarFallback>SC</AvatarFallback>
 						</Avatar>
 						<div>
 							<div className="text-sm font-medium text-gray-900">
-								Sarah Chen
+								{user?.name}
 							</div>
-							<div className="text-xs text-gray-600">@sarahcreates</div>
+							<div className="text-xs text-gray-600">
+								{user?.username}
+							</div>
 						</div>
 					</div>
 				</div>

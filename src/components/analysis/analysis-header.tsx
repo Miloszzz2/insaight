@@ -7,6 +7,7 @@ import { useAnalysis } from "@/app/analysis/[id]/context/analysis-context-provid
 
 export default function AnalysisHeader() {
 	const { isAnalyzed, analysisData } = useAnalysis();
+
 	return (
 		<header className="flex h-auto min-h-16 shrink-0 gap-2 border-b px-4 py-4 items-center">
 			<SidebarTrigger />

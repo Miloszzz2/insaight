@@ -16,7 +16,7 @@ async function getChannelDetails() {
 			}
 		);
 		const channelDetails = await channelDetailsData.json();
-		console.log(channelDetails);
+		console.log(channelDetails.items[0].snippet);
 		return NextResponse.json(channelDetails);
 	} catch (error) {
 		console.error("Error fetching channelId:", error);
@@ -38,7 +38,6 @@ async function getChannelDetails() {
 export async function upsertUser(user: {
 	id: string;
 	email: string;
-	name: string;
 	avatar_url: string;
 	created_at: string;
 }) {
@@ -47,10 +46,12 @@ export async function upsertUser(user: {
 	const channelDetailsJson = await channelDetails?.json();
 	const uploadPlaylistId = channelDetailsJson.items[0].id;
 	const name = channelDetailsJson.items[0].snippet.title;
+	const username = channelDetailsJson.items[0].snippet.customUrl;
 	const { error: upsertUsersError } = await supabase.from("users").upsert({
 		id: user.id,
 		email: user.email,
 		name: name,
+		username: username,
 		avatar_url: user.avatar_url,
 		created_at: user.created_at,
 		upload_playlist_id: uploadPlaylistId,
