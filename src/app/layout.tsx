@@ -4,7 +4,6 @@ import { Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-// TODO add better font
 const publicSans = Public_Sans({ weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
