@@ -38,70 +38,70 @@ export type Database = {
 				Row: {
 					created_at: string | null;
 					id: string;
-					negative_count: number | null;
-					neutral_count: number | null;
-					positive_count: number | null;
-					summary: string | null;
-					video_id: string | null;
+					negative_count: number;
+					neutral_count: number;
+					positive_count: number;
+					summary: string;
+					youtube_video_id: string | null;
 				};
 				Insert: {
 					created_at?: string | null;
 					id?: string;
-					negative_count?: number | null;
-					neutral_count?: number | null;
-					positive_count?: number | null;
-					summary?: string | null;
-					video_id?: string | null;
+					negative_count?: number;
+					neutral_count?: number;
+					positive_count?: number;
+					summary: string;
+					youtube_video_id?: string | null;
 				};
 				Update: {
 					created_at?: string | null;
 					id?: string;
-					negative_count?: number | null;
-					neutral_count?: number | null;
-					positive_count?: number | null;
-					summary?: string | null;
-					video_id?: string | null;
+					negative_count?: number;
+					neutral_count?: number;
+					positive_count?: number;
+					summary?: string;
+					youtube_video_id?: string | null;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "analysis_video_id_fkey";
-						columns: ["video_id"];
-						isOneToOne: false;
+						foreignKeyName: "analysis_youtube_video_id_fkey";
+						columns: ["youtube_video_id"];
+						isOneToOne: true;
 						referencedRelation: "videos";
-						referencedColumns: ["id"];
+						referencedColumns: ["youtube_id"];
 					}
 				];
 			};
 			comment_groups: {
 				Row: {
-					count: number | null;
-					created_at: string | null;
-					description: string | null;
-					icon: string | null;
+					count: number;
+					created_at: string;
+					description: string;
+					icon: string;
 					id: string;
 					name: string;
-					video_id: string | null;
-					video_youtube_id: string | null;
+					video_id: string;
+					video_youtube_id: string;
 				};
 				Insert: {
-					count?: number | null;
-					created_at?: string | null;
-					description?: string | null;
-					icon?: string | null;
+					count?: number;
+					created_at?: string;
+					description: string;
+					icon: string;
 					id: string;
 					name: string;
-					video_id?: string | null;
-					video_youtube_id?: string | null;
+					video_id: string;
+					video_youtube_id: string;
 				};
 				Update: {
-					count?: number | null;
-					created_at?: string | null;
-					description?: string | null;
-					icon?: string | null;
+					count?: number;
+					created_at?: string;
+					description?: string;
+					icon?: string;
 					id?: string;
 					name?: string;
-					video_id?: string | null;
-					video_youtube_id?: string | null;
+					video_id?: string;
+					video_youtube_id?: string;
 				};
 				Relationships: [
 					{
@@ -115,42 +115,42 @@ export type Database = {
 			};
 			comments: {
 				Row: {
-					author_name: string | null;
-					avatar: string | null;
-					category_id: string | null;
-					created_at: string | null;
+					author_name: string;
+					avatar: string;
+					category_id: string;
+					created_at: string;
 					id: string;
-					likes: number | null;
-					sentiment: string | null;
+					likes: number;
+					sentiment: Database["public"]["Enums"]["sentiment"];
 					text: string;
-					video_id: string | null;
-					video_youtube_id: string | null;
+					video_id: string;
+					video_youtube_id: string;
 					youtube_comment_id: string;
 				};
 				Insert: {
-					author_name?: string | null;
-					avatar?: string | null;
-					category_id?: string | null;
-					created_at?: string | null;
+					author_name: string;
+					avatar: string;
+					category_id: string;
+					created_at?: string;
 					id?: string;
-					likes?: number | null;
-					sentiment?: string | null;
+					likes: number;
+					sentiment: Database["public"]["Enums"]["sentiment"];
 					text: string;
-					video_id?: string | null;
-					video_youtube_id?: string | null;
+					video_id: string;
+					video_youtube_id: string;
 					youtube_comment_id: string;
 				};
 				Update: {
-					author_name?: string | null;
-					avatar?: string | null;
-					category_id?: string | null;
-					created_at?: string | null;
+					author_name?: string;
+					avatar?: string;
+					category_id?: string;
+					created_at?: string;
 					id?: string;
-					likes?: number | null;
-					sentiment?: string | null;
+					likes?: number;
+					sentiment?: Database["public"]["Enums"]["sentiment"];
 					text?: string;
-					video_id?: string | null;
-					video_youtube_id?: string | null;
+					video_id?: string;
+					video_youtube_id?: string;
 					youtube_comment_id?: string;
 				};
 				Relationships: [
@@ -202,42 +202,45 @@ export type Database = {
 			};
 			videos: {
 				Row: {
-					comment_count: number | null;
-					created_at: string | null;
-					duration: string | null;
+					comment_count: number;
+					comments_fetched: boolean;
+					created_at: string;
+					duration: string;
 					id: string;
-					like_count: number | null;
-					published_at: string | null;
-					thumbnail_url: string | null;
-					title: string | null;
-					user_id: string | null;
-					views: number | null;
+					like_count: number;
+					published_at: string;
+					thumbnail_url: string;
+					title: string;
+					user_id: string;
+					views: number;
 					youtube_id: string;
 				};
 				Insert: {
-					comment_count?: number | null;
-					created_at?: string | null;
-					duration?: string | null;
+					comment_count?: number;
+					comments_fetched?: boolean;
+					created_at: string;
+					duration: string;
 					id?: string;
-					like_count?: number | null;
-					published_at?: string | null;
-					thumbnail_url?: string | null;
-					title?: string | null;
-					user_id?: string | null;
-					views?: number | null;
+					like_count?: number;
+					published_at: string;
+					thumbnail_url: string;
+					title: string;
+					user_id: string;
+					views?: number;
 					youtube_id: string;
 				};
 				Update: {
-					comment_count?: number | null;
-					created_at?: string | null;
-					duration?: string | null;
+					comment_count?: number;
+					comments_fetched?: boolean;
+					created_at?: string;
+					duration?: string;
 					id?: string;
-					like_count?: number | null;
-					published_at?: string | null;
-					thumbnail_url?: string | null;
-					title?: string | null;
-					user_id?: string | null;
-					views?: number | null;
+					like_count?: number;
+					published_at?: string;
+					thumbnail_url?: string;
+					title?: string;
+					user_id?: string;
+					views?: number;
 					youtube_id?: string;
 				};
 				Relationships: [
@@ -258,7 +261,7 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Enums: {
-			[_ in never]: never;
+			sentiment: "positive" | "negative" | "neutral";
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -376,6 +379,8 @@ export const Constants = {
 		Enums: {},
 	},
 	public: {
-		Enums: {},
+		Enums: {
+			sentiment: ["positive", "negative", "neutral"],
+		},
 	},
 } as const;

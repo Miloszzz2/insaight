@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 	const supabase = await createClient();
 	const session = supabase.auth.getSession();
 	const token = (await session).data.session?.provider_token;
-	const userId = (await supabase.auth.getUser()).data.user?.id;
+	const userId = (await supabase.auth.getUser()).data.user?.id as string;
 
 	const { data: userData } = await supabase
 		.from("users")
@@ -45,6 +45,7 @@ export async function GET(request: Request) {
 					views: item.statistics.viewCount,
 					comment_count: item.statistics.commentCount,
 					like_count: item.statistics.likeCount,
+					comments_fetched: false,
 				};
 				return video;
 			});

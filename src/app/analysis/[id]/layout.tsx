@@ -1,19 +1,19 @@
-"use client";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import React from "react";
-import { AnalysisContextProvider } from "./context/analysis-context-provider";
 import AnalysisHeader from "@/components/analysis/analysis-header";
+import { AnalysisContextProvider } from "./context/analysis-context-provider";
 
-export default function AnalysisLayout({
+export default async function AnalysisLayout({
 	children,
+	params,
 }: {
 	children: React.ReactNode;
+	params: { id: string };
 }) {
 	return (
 		<AnalysisContextProvider>
 			<SidebarProvider>
-				<AnalysisSidebar />
+				<AnalysisSidebar videoId={params.id} />
 				<SidebarInset>
 					<AnalysisHeader />
 					{children}

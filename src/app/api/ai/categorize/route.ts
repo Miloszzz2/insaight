@@ -5,10 +5,12 @@ import { Comment } from "@/types/db/comment";
 import { Category, CommentGroup } from "@/types/db/comment-group";
 import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
+import { Analysis } from "@/types/db/analysis";
 
 export async function POST(request: NextRequest) {
 	try {
 		const { comments }: { comments: Comment[] } = await request.json();
+
 		if (!process.env.GEMINI_API_KEY) {
 			throw new Error("GEMINI_API_KEY environment variable is required");
 		}
@@ -30,7 +32,6 @@ export async function POST(request: NextRequest) {
          - Each category should have at least one comment
          - If comments are very diverse, create broader categories
          - If comments cluster around specific themes, create specific categories
-         - Provide reasoning for each comment assignment
 			- For each category, assign an appropriate Lucide React icon name that visually represents the category theme
          - Use only valid Lucide React icon names (e.g., "Heart", "MessageCircle", "ThumbsUp", "Star", "Users", "Video", "Music", "Settings", "Lightbulb", "Target", "TrendingUp", "Camera", "Mic", "Edit", "Play", "Volume2", "Smile", "AlertCircle", "CheckCircle", "Info", "Award", "Bookmark", "Clock", "Eye", "Globe", "Home", "Search", "Send", "Share", "Tool", "Zap", etc.)
          - Analyze overall sentiment of comment; pay attention to emojis (positive, negative, neutral)
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
          ],
          "comments": [
             {
-               "category_name": "assigned category name",
+               "category_name": "proper category name",
                "sentiment": "positive" | "negative" | "neutral"
             }
          ],
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
 						created_at: comments[index].created_at,
 						name: cat.name || "Unknown",
 						description: cat.description || "No description",
-						count: categoryCommentCounts[cat.name],
+						count: categoryCommentCounts[cat.name] || 0,
 						icon: cat.icon || "MessageCircle",
 						video_youtube_id: comments[index].video_youtube_id,
 					})
@@ -141,15 +142,12 @@ export async function POST(request: NextRequest) {
 						video_id: comments[index]?.video_id || "",
 						author_name: comments[index]?.author_name || "Unknown",
 						text: comments[index]?.text || "",
-						sentiment:
-							comment.sentiment ||
-							comments[index]?.sentiment ||
-							"neutral",
+						sentiment: comment.sentiment,
 						created_at: comments[index]?.created_at || "",
 						avatar: comments[index]?.avatar || "",
 						likes: comments[index]?.likes || 0,
 						category_id: categoryNameToId[comment.category_name],
-						video_youtube_id: comments[index].video_youtube_id,
+						video_youtube_id: comments[0].video_youtube_id,
 					})
 				) || [],
 			overallSummary: {
@@ -175,16 +173,29 @@ export async function POST(request: NextRequest) {
 			},
 		};
 
-		console.log(validatedResult.categories);
-
 		const supabase = await createClient();
 
+		// Delete existing comment groups for this video
+		const { error: deleteError } = await supabase
+			.from("comment_groups")
+			.delete()
+			.eq("video_youtube_id", comments[0].video_youtube_id);
+
+		if (deleteError) {
+			console.error("Error deleting existing comment groups:", deleteError);
+			return NextResponse.json(
+				{
+					error: "Failed to delete existing comment groups",
+					details: deleteError.message,
+				},
+				{ status: 500 }
+			);
+		}
+
+		// Insert new comment groups
 		const { error: insertError } = await supabase
 			.from("comment_groups")
-			.upsert(validatedResult.categories, {
-				onConflict: "id",
-				ignoreDuplicates: true,
-			});
+			.insert(validatedResult.categories);
 
 		if (insertError) {
 			console.error("Error inserting comment groups:", insertError);
@@ -211,6 +222,60 @@ export async function POST(request: NextRequest) {
 				{
 					error: "Failed to upsert comments",
 					details: commentsUpsertError?.message,
+				},
+				{ status: 500 }
+			);
+		}
+
+		// Updating videos comments_fetched field
+
+		const { error: updateVideoCommentsFetchedStatusError } = await supabase
+			.from("videos")
+			.update({ comments_fetched: true })
+			.eq("youtube_id", comments[0].video_youtube_id);
+
+		if (updateVideoCommentsFetchedStatusError) {
+			console.error(
+				"Error updating video:",
+
+				updateVideoCommentsFetchedStatusError?.message
+			);
+			return NextResponse.json(
+				{
+					error: "Failed to update video",
+					details: updateVideoCommentsFetchedStatusError?.message,
+				},
+				{ status: 500 }
+			);
+		}
+
+		const analysisData: Analysis = {
+			youtube_video_id: comments[0].video_youtube_id,
+			summary: result.overallSummary?.mainTakeaways,
+			positive_count: result.overallSummary?.sentiment?.positive,
+			negative_count: result.overallSummary?.sentiment?.negative,
+			neutral_count: result.overallSummary?.sentiment?.neutral,
+			created_at: new Date()
+				.toISOString()
+				.replace("T", " ")
+				.replace("Z", ""),
+		};
+		const { error: insertAnalysisDataError } = await supabase
+			.from("analysis")
+			.upsert(analysisData, {
+				onConflict: "youtube_video_id",
+				ignoreDuplicates: false,
+			});
+
+		if (insertAnalysisDataError) {
+			console.error(
+				"Error inserting analysis data:",
+				insertAnalysisDataError
+			);
+			return NextResponse.json(
+				{
+					error: "Failed to insert analysis data",
+					details: insertAnalysisDataError?.message,
 				},
 				{ status: 500 }
 			);

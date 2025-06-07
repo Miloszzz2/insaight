@@ -1,6 +1,6 @@
 import { getCommentsFromGroup } from "./actions/get-comments";
 import { getCategoryName } from "./actions/get-category-name";
-import Comments from "@/components/analysis/comments";
+import Comments from "@/components/analysis/comments-group";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 

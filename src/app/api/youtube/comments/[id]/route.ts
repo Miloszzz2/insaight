@@ -31,7 +31,7 @@ export async function GET(
 			(item: any): Comment => ({
 				id: randomUUID(),
 				youtube_comment_id: item.id,
-				video_id: video_id && video_id.length > 0 ? video_id[0].id : null,
+				video_id: video_id && video_id.length > 0 ? video_id[0].id : "",
 				author_name: item.snippet.topLevelComment.snippet.authorDisplayName,
 				text: item.snippet.topLevelComment.snippet.textDisplay,
 				sentiment: "neutral",
@@ -44,7 +44,7 @@ export async function GET(
 				avatar: item.snippet.topLevelComment.snippet.authorProfileImageUrl,
 				likes: item.snippet.topLevelComment.snippet.likeCount,
 				category_id: "Unmatched",
-				video_youtube_id: id,
+				video_youtube_id: id || " ",
 			})
 		);
 

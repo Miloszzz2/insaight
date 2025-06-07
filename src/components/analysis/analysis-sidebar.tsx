@@ -1,66 +1,54 @@
-"use client";
+import { createClient } from "@/utils/supabase/server";
+import getAnalysisData from "../../app/analysis/[id]/actions/get-analysis.data";
+import { AnalysisSidebarClient } from "@/components/analysis/analysis-sidebar-client";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
 import {
 	Sidebar,
 	SidebarHeader,
-	SidebarContent,
-	SidebarGroup,
-	SidebarGroupLabel,
-	SidebarGroupContent,
 	SidebarMenu,
 	SidebarMenuItem,
 	SidebarMenuButton,
 	SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import signOut from "@/app/dashboard/actions/sign-out";
+import { LogOut } from "lucide-react";
 
-import { CommentGroup } from "@/types/db/comment-group";
+interface SidebarProps {
+	videoId: string;
+}
 
-import { DynamicIcon } from "@/utils/analysis/dynamic-icon";
-import { createClient } from "@/utils/supabase/client";
+export async function AnalysisSidebar({ videoId }: SidebarProps) {
+	const supabase = await createClient();
 
-import { Film, Lightbulb, Mic, Music, MessageCircle } from "lucide-react";
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+	// Get current user data from server
+	const {
+		data: { user: authUser },
+	} = await supabase.auth.getUser();
+	if (!authUser?.id) {
+		throw new Error("User is not authenticated");
+	}
+	const { data: dbUser } = await supabase
+		.from("users")
+		.select()
+		.eq("id", authUser.id)
+		.limit(1)
+		.single();
 
-import { useAnalysis } from "@/app/analysis/[id]/context/analysis-context-provider";
-import { categoryConfig } from "@/utils/dashboard/category-config";
+	const userData = {
+		name: dbUser?.name,
+		username: dbUser?.username,
+		avatar_url: dbUser?.avatar_url,
+	};
 
-export function AnalysisSidebar() {
-	const [user, setUser] = useState<{
-		name: string | null | undefined;
-		username: string | null | undefined;
-		avatar_url: string | null | undefined;
-	}>();
-	const { isAnalyzed, analysisData } = useAnalysis();
-	const supabase = createClient();
-	const getProfile = useCallback(async () => {
-		try {
-			const authUser = (await supabase.auth.getUser()).data.user;
-			if (!authUser?.id) {
-				throw Error;
-			}
-			const { data: dbUser } = await supabase
-				.from("users")
-				.select()
-				.eq("id", authUser?.id)
-				.limit(1)
-				.single();
-
-			setUser({
-				name: dbUser?.name,
-				username: dbUser?.username,
-				avatar_url: dbUser?.avatar_url,
-			});
-		} catch (error: any) {
-			toast.error(error.toString());
-		}
-	}, [user]);
-
-	useEffect(() => {
-		getProfile();
-	}, [user, getProfile]);
+	// Get analysis data from server
+	const analysisData = await getAnalysisData(videoId);
 
 	return (
 		<Sidebar>
@@ -71,111 +59,48 @@ export function AnalysisSidebar() {
 					</h2>
 				</div>
 			</SidebarHeader>
-
-			<SidebarContent>
-				<SidebarGroup>
-					<SidebarGroupLabel>Categories</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{!isAnalyzed &&
-								categoryConfig.map((category) => {
-									const IconComponent = category.icon;
-									return (
-										<SidebarMenuItem key={category.id}>
-											<SidebarMenuButton
-												isActive={category.active && isAnalyzed}
-												disabled={!isAnalyzed}
-												className="h-12 flex justify-between items-center"
-											>
-												<div className="flex items-center gap-2">
-													<IconComponent className="w-4 h-4" />
-													<span
-														className={
-															!isAnalyzed ? "text-gray-400" : ""
-														}
-													>
-														{category.name}
-													</span>
-												</div>
-												<Badge
-													variant="secondary"
-													className={`ml-auto ${
-														category.active && isAnalyzed
-															? "bg-violet-100 text-violet-700"
-															: "bg-gray-100 text-gray-600"
-													}`}
-												>
-													{category.count}
-												</Badge>
-											</SidebarMenuButton>
-										</SidebarMenuItem>
-									);
-								})}
-							{isAnalyzed &&
-								analysisData.categories.map(
-									(category: CommentGroup) => {
-										return (
-											<SidebarMenuItem key={category.name}>
-												<Link
-													href={`/analysis/${category.video_youtube_id}/${category.id}`}
-												>
-													<SidebarMenuButton
-														disabled={!isAnalyzed}
-														className="h-12 flex justify-between items-center"
-													>
-														<div className="flex items-center gap-2">
-															<DynamicIcon
-																name={category.icon}
-																className="w-4 h-4 text-gray-600"
-															/>
-															<span
-																className={
-																	!isAnalyzed
-																		? "text-gray-400"
-																		: ""
-																}
-															>
-																{category.name}
-															</span>
-														</div>
-														<Badge
-															variant="secondary"
-															className={`ml-auto ${
-																isAnalyzed
-																	? "bg-violet-100 text-violet-700"
-																	: "bg-gray-100 text-gray-600"
-															}`}
-														>
-															{category.count}
-														</Badge>
-													</SidebarMenuButton>
-												</Link>
-											</SidebarMenuItem>
-										);
-									}
-								)}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-			</SidebarContent>
-
+			<AnalysisSidebarClient
+				user={userData}
+				analysisData={analysisData}
+				isAnalyzed={analysisData.comments.length > 0}
+			/>
 			<SidebarFooter>
-				<div className="px-2 py-2">
-					<div className="flex items-center space-x-3">
-						<Avatar className="w-8 h-8">
-							<AvatarImage src={user?.avatar_url as string} />
-							<AvatarFallback>SC</AvatarFallback>
-						</Avatar>
-						<div>
-							<div className="text-sm font-medium text-gray-900">
-								{user?.name}
-							</div>
-							<div className="text-xs text-gray-600">
-								{user?.username}
-							</div>
-						</div>
-					</div>
-				</div>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild className="px-2 py-4 h-14">
+								<SidebarMenuButton>
+									<div className="flex items-center space-x-3">
+										<Avatar className="w-10 h-10">
+											<AvatarImage
+												src={dbUser?.avatar_url as string}
+											/>
+											<AvatarFallback>SC</AvatarFallback>
+										</Avatar>
+										<div>
+											<div className="font-medium text-gray-900">
+												{dbUser?.name}
+											</div>
+											<div className="text-sm text-gray-600">
+												{dbUser?.username}
+											</div>
+										</div>
+									</div>
+								</SidebarMenuButton>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent side="top" className="w-[230px]">
+								<DropdownMenuItem className="w-full h-full">
+									<form action={signOut} className="w-full">
+										<SidebarMenuButton>
+											<LogOut className="w-4 h-4" />
+											<span className="font-semibold">Sign Out</span>
+										</SidebarMenuButton>
+									</form>
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</SidebarMenuItem>
+				</SidebarMenu>
 			</SidebarFooter>
 		</Sidebar>
 	);
