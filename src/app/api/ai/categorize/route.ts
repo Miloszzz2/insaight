@@ -58,13 +58,13 @@ export async function POST(request: NextRequest) {
          ],
          "comments": [
             {
-               "category_name": "proper category name",
+               "category_name": "category name for comment",
                "sentiment": "positive" | "negative" | "neutral"
             }
          ],
          "overallSummary": {
             "sentiment": {
-               "overall": "positive/negative/neutral/mixed",
+               "overall": "positive/negative/neutral",
                "positive": number_of_positive_comments,
                "negative": number_of_negative_comments,
                "neutral": number_of_neutral_comments
@@ -97,18 +97,35 @@ export async function POST(request: NextRequest) {
 
 		const categoryNameToId: Record<string, string> = {};
 
+		// Walidacja kategorii i tworzenie ID
+		if (!result.categories || !Array.isArray(result.categories)) {
+			throw new Error("Invalid AI response: categories array is missing");
+		}
+
 		result.categories.forEach((cat: any) => {
+			if (!cat.name) {
+				throw new Error("Invalid category: name is missing");
+			}
 			const uuid = randomUUID();
-			categoryNameToId[cat.name] = uuid;
+			categoryNameToId[cat.name.trim()] = uuid;
 		});
+
 		const categoryCommentCounts: Record<string, number> = {};
+
+		// Walidacja komentarzy i liczenie
+		if (!result.comments || !Array.isArray(result.comments)) {
+			throw new Error("Invalid AI response: comments array is missing");
+		}
 
 		result.comments?.forEach(
 			(comment: {
 				category_name: string;
 				sentiment: "positive" | "negative" | "neutral";
 			}) => {
-				const catName = comment.category_name;
+				if (!comment.category_name) {
+					throw new Error("Invalid comment: category_name is missing");
+				}
+				const catName = comment.category_name.trim();
 				categoryCommentCounts[catName] =
 					(categoryCommentCounts[catName] || 0) + 1;
 			}
@@ -117,15 +134,18 @@ export async function POST(request: NextRequest) {
 		const validatedResult: CategorizationResult = {
 			categories:
 				result.categories?.map(
-					(cat: any, index: number): CommentGroup => ({
-						id: categoryNameToId[cat.name],
-						video_id: comments[index].video_id,
-						created_at: comments[index].created_at,
-						name: cat.name || "Unknown",
+					(cat: any): CommentGroup => ({
+						id: categoryNameToId[cat.name.trim()],
+						video_id: comments[0].video_id,
+						created_at: new Date()
+							.toISOString()
+							.replace("T", " ")
+							.replace("Z", ""),
+						name: cat.name?.trim() || "Unknown",
 						description: cat.description || "No description",
-						count: categoryCommentCounts[cat.name] || 0,
+						count: categoryCommentCounts[cat.name.trim()] || 0,
 						icon: cat.icon || "MessageCircle",
-						video_youtube_id: comments[index].video_youtube_id,
+						video_youtube_id: comments[0].video_youtube_id,
 					})
 				) || [],
 			comments:
@@ -136,19 +156,38 @@ export async function POST(request: NextRequest) {
 							sentiment: "positive" | "negative" | "neutral";
 						},
 						index: number
-					): Comment => ({
-						id: comments[index]?.id || `comment_${index}`,
-						youtube_comment_id: comments[index]?.youtube_comment_id,
-						video_id: comments[index]?.video_id || "",
-						author_name: comments[index]?.author_name || "Unknown",
-						text: comments[index]?.text || "",
-						sentiment: comment.sentiment,
-						created_at: comments[index]?.created_at || "",
-						avatar: comments[index]?.avatar || "",
-						likes: comments[index]?.likes || 0,
-						category_id: categoryNameToId[comment.category_name],
-						video_youtube_id: comments[0].video_youtube_id,
-					})
+					): Comment => {
+						const trimmedCategoryName = comment.category_name.trim();
+						const categoryId = categoryNameToId[trimmedCategoryName];
+
+						if (!categoryId) {
+							console.error(
+								`Category not found for name: ${trimmedCategoryName}`
+							);
+							throw new Error(
+								`Category not found: ${trimmedCategoryName}`
+							);
+						}
+
+						return {
+							id: comments[index]?.id || `comment_${index}`,
+							youtube_comment_id: comments[index]?.youtube_comment_id,
+							video_id: comments[index]?.video_id || "",
+							author_name: comments[index]?.author_name || "Unknown",
+							text: comments[index]?.text || "",
+							sentiment: comment.sentiment,
+							created_at:
+								comments[index]?.created_at ||
+								new Date()
+									.toISOString()
+									.replace("T", " ")
+									.replace("Z", ""),
+							avatar: comments[index]?.avatar || "",
+							likes: comments[index]?.likes || 0,
+							category_id: categoryId,
+							video_youtube_id: comments[0].video_youtube_id,
+						};
+					}
 				) || [],
 			overallSummary: {
 				sentiment: {

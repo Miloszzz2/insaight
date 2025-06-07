@@ -12,10 +12,8 @@ import { Loader2 } from "lucide-react";
 
 import { fetchVideos } from "./actions/fetch-videos";
 
-import { Video } from "@/types/db/video";
-
 export default async function DashboardPage() {
-	const videos = fetchVideos({ refetchFromApi: false }) as Promise<Video[]>;
+	const videos = fetchVideos({ refetchFromApi: false });
 	return (
 		<SidebarProvider>
 			<AppSidebar />
@@ -35,7 +33,9 @@ export default async function DashboardPage() {
 					<Badge
 						variant="secondary"
 						className="bg-violet-100 text-violet-700 text-sm"
-					></Badge>
+					>
+						{(await videos).length}
+					</Badge>
 				</header>
 				{/* Main Content */}
 				<main className="flex-1 p-8 pt-0">

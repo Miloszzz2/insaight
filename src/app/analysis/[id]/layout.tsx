@@ -8,12 +8,13 @@ export default async function AnalysisLayout({
 	params,
 }: {
 	children: React.ReactNode;
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }) {
+	const { id } = await params;
 	return (
 		<AnalysisContextProvider>
 			<SidebarProvider>
-				<AnalysisSidebar videoId={params.id} />
+				<AnalysisSidebar videoId={id} />
 				<SidebarInset>
 					<AnalysisHeader />
 					{children}

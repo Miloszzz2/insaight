@@ -13,10 +13,10 @@ import {
 	SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-
 import { CommentGroup } from "@/types/db/comment-group";
 import { DynamicIcon } from "@/utils/analysis/dynamic-icon";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { categoryConfig } from "@/utils/dashboard/category-config";
 import { AnalysisData } from "@/types/analysis/analysis-data";
 import { MessageSquare } from "lucide-react";
@@ -36,41 +36,51 @@ export function AnalysisSidebarClient({
 	analysisData,
 	isAnalyzed,
 }: AnalysisSidebarClientProps) {
+	const pathname = usePathname();
+
 	return (
 		<SidebarContent>
 			<SidebarGroup>
 				<SidebarGroupLabel>Categories</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						<SidebarMenuItem key={"all"}>
-							<Link
-								href={`/analysis/${analysisData.comments[0].video_youtube_id}`}
-							>
-								<SidebarMenuButton
-									disabled={!isAnalyzed}
-									className="h-12 flex justify-between items-center"
+						{analysisData.comments.length > 0 && (
+							<SidebarMenuItem key={"all"}>
+								<Link
+									href={`/analysis/${analysisData.comments[0].video_youtube_id}`}
 								>
-									<div className="flex items-center gap-2">
-										<MessageSquare className="w-4 h-4 text-gray-600" />
-										<span
-											className={!isAnalyzed ? "text-gray-400" : ""}
-										>
-											All Comments
-										</span>
-									</div>
-									<Badge
-										variant="secondary"
-										className={`ml-auto ${
-											isAnalyzed
-												? "bg-violet-100 text-violet-700"
-												: "bg-gray-100 text-gray-600"
-										}`}
+									<SidebarMenuButton
+										disabled={!isAnalyzed}
+										isActive={
+											pathname ===
+											`/analysis/${analysisData.comments[0].video_youtube_id}`
+										}
+										className="h-12 flex justify-between items-center"
 									>
-										{analysisData.comments.length}
-									</Badge>
-								</SidebarMenuButton>
-							</Link>
-						</SidebarMenuItem>
+										<div className="flex items-center gap-2">
+											<MessageSquare className="w-4 h-4 text-gray-600" />
+											<span
+												className={
+													!isAnalyzed ? "text-gray-400" : ""
+												}
+											>
+												All Comments
+											</span>
+										</div>
+										<Badge
+											variant="secondary"
+											className={`ml-auto ${
+												isAnalyzed
+													? "bg-violet-100 text-violet-700"
+													: "bg-gray-100 text-gray-600"
+											}`}
+										>
+											{analysisData.comments.length}
+										</Badge>
+									</SidebarMenuButton>
+								</Link>
+							</SidebarMenuItem>
+						)}
 						{!isAnalyzed &&
 							categoryConfig.map((category) => {
 								const IconComponent = category.icon;
@@ -106,42 +116,44 @@ export function AnalysisSidebarClient({
 								);
 							})}
 						{isAnalyzed &&
-							analysisData.categories.map((category: CommentGroup) => (
-								<SidebarMenuItem key={category.name}>
-									<Link
-										href={`/analysis/${category.video_youtube_id}/${category.id}`}
-									>
-										<SidebarMenuButton
-											disabled={!isAnalyzed}
-											className="h-12 flex justify-between items-center"
-										>
-											<div className="flex items-center gap-2">
-												<DynamicIcon
-													name={category.icon}
-													className="w-4 h-4 text-gray-600"
-												/>
-												<span
-													className={
-														!isAnalyzed ? "text-gray-400" : ""
-													}
-												>
-													{category.name}
-												</span>
-											</div>
-											<Badge
-												variant="secondary"
-												className={`ml-auto ${
-													isAnalyzed
-														? "bg-violet-100 text-violet-700"
-														: "bg-gray-100 text-gray-600"
-												}`}
+							analysisData.categories.map((category: CommentGroup) => {
+								const categoryPath = `/analysis/${category.video_youtube_id}/${category.id}`;
+								return (
+									<SidebarMenuItem key={category.name}>
+										<Link href={categoryPath}>
+											<SidebarMenuButton
+												disabled={!isAnalyzed}
+												isActive={pathname === categoryPath}
+												className="h-12 flex justify-between items-center"
 											>
-												{category.count}
-											</Badge>
-										</SidebarMenuButton>
-									</Link>
-								</SidebarMenuItem>
-							))}
+												<div className="flex items-center gap-2">
+													<DynamicIcon
+														name={category.icon}
+														className="w-4 h-4 text-gray-600"
+													/>
+													<span
+														className={
+															!isAnalyzed ? "text-gray-400" : ""
+														}
+													>
+														{category.name}
+													</span>
+												</div>
+												<Badge
+													variant="secondary"
+													className={`ml-auto ${
+														isAnalyzed
+															? "bg-violet-100 text-violet-700"
+															: "bg-gray-100 text-gray-600"
+													}`}
+												>
+													{category.count}
+												</Badge>
+											</SidebarMenuButton>
+										</Link>
+									</SidebarMenuItem>
+								);
+							})}
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>

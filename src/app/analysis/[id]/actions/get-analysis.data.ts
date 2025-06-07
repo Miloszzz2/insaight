@@ -1,11 +1,25 @@
 "use server";
 import { AnalysisData } from "@/types/analysis/analysis-data";
-import { Comment } from "@/types/db/comment";
 import { createClient } from "@/utils/supabase/server";
+import { getCommentsFetched } from "./get-comments-fetched";
 
 export default async function getAnalysisData(
 	video_id: string
 ): Promise<AnalysisData> {
+	const commentsFetched = await getCommentsFetched(video_id);
+	if (!commentsFetched) {
+		const emptyAnalysisData: AnalysisData = {
+			comments: [],
+			categories: [],
+			sentimentSummary: {
+				positive: 0,
+				negative: 0,
+				neutral: 0,
+			},
+			aiSummary: "",
+		};
+		return emptyAnalysisData;
+	}
 	try {
 		const supabase = await createClient();
 		const { data: commentsData, error: selectCommentsError } = await supabase
@@ -34,7 +48,6 @@ export default async function getAnalysisData(
 				},
 				aiSummary: analysisDataDb?.summary || "",
 			};
-			console.log(analysisData.sentimentSummary);
 			return analysisData;
 		}
 		throw new Error("Analysis data not found for the given video_id.");

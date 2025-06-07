@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import signOut from "@/app/dashboard/actions/sign-out";
 import { LogOut } from "lucide-react";
+import { getCommentsFetched } from "@/app/analysis/[id]/actions/get-comments-fetched";
 
 interface SidebarProps {
 	videoId: string;
@@ -59,11 +60,13 @@ export async function AnalysisSidebar({ videoId }: SidebarProps) {
 					</h2>
 				</div>
 			</SidebarHeader>
+
 			<AnalysisSidebarClient
 				user={userData}
 				analysisData={analysisData}
 				isAnalyzed={analysisData.comments.length > 0}
 			/>
+
 			<SidebarFooter>
 				<SidebarMenu>
 					<SidebarMenuItem>

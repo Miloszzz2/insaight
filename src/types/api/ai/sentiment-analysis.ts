@@ -14,7 +14,6 @@ export interface TextStatistics {
 	sentences: number;
 	averageWordsPerSentence: number;
 }
-//TODO zrobic porzadek z tym typem
 export interface CommentAnalysis extends SentimentResult {
 	id: string;
 	youtube_comment_id: string;
