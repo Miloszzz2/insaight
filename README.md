@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📊 YouTube Comment Analyzer
 
-## Getting Started
+An AI-powered web application that fetches comments from your YouTube videos and automatically categorizes them by **topic** and **sentiment** – helping content creators quickly understand feedback and improve their content.
 
-First, run the development server:
+![obraz](https://github.com/user-attachments/assets/a4d5fd76-bce7-45fb-a98c-64f1cf8299bd)
+ <!-- Replace with actual image if available -->
+
+---
+
+## ✨ Features
+
+- 🔐 **YouTube Authentication** – log in with Google to access your videos  
+- 🎥 **Video Dashboard** – browse your uploaded videos with thumbnails, stats, and comment counts  
+- 🧠 **AI Comment Analysis** – group viewer feedback by category (e.g., suggestions, editing tips, appreciation)  
+- 😀 **Sentiment Grouping** – classify comments into positive, neutral, and negative tones  
+- 📁 **Category Sidebar** – easily navigate feedback types, each with an emoji icon (🎬, 💡, 👏, etc.)  
+- 💬 **Comment Viewer** – view comments grouped by themes and sentiment in a clean UI  
+
+---
+
+## 🖼 Demo
+
+Coming soon...
+
+---
+
+## 🔧 Tech Stack
+
+- **Frontend**: [Next.js](https://nextjs.org/), TypeScript, Tailwind CSS, Framer Motion  
+- **Backend**: [Supabase](https://supabase.com/) (auth, database, API)  
+- **AI**: Gemini Pro or OpenAI GPT for comment analysis  
+- **YouTube API**: for fetching authenticated user videos and comments  
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/your-username/youtube-comment-analyzer.git
+cd youtube-comment-analyzer
+```
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Create a .env.local file and add the following:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+GEMINI_API_KEY=your_google_client_id
+YOUTUBE_API_KEY=your_youtube_api_key
+```
+### 4. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App will be running at http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📄 License
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License
