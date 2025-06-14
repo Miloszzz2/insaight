@@ -18,17 +18,12 @@ An AI-powered web application that fetches comments from your YouTube videos and
 
 ---
 
-## 🖼 Demo
-
-Coming soon...
-
----
 
 ## 🔧 Tech Stack
 
 - **Frontend**: [Next.js](https://nextjs.org/), TypeScript, Tailwind CSS, Framer Motion  
 - **Backend**: [Supabase](https://supabase.com/) (auth, database, API)  
-- **AI**: Gemini Pro or OpenAI GPT for comment analysis  
+- **AI**: Gemini 2.0 Flash API
 - **YouTube API**: for fetching authenticated user videos and comments  
 
 ---
