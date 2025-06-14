@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { CategorizationResult } from "@/types/api/ai/categorize";
 import { Comment } from "@/types/db/comment";
-import { Category, CommentGroup } from "@/types/db/comment-group";
+import { CommentGroup } from "@/types/db/comment-group";
 import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 import { Analysis } from "@/types/db/analysis";
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 			throw new Error("Invalid AI response: categories array is missing");
 		}
 
-		result.categories.forEach((cat: any) => {
+		result.categories.forEach((cat: { name: string }) => {
 			if (!cat.name) {
 				throw new Error("Invalid category: name is missing");
 			}
@@ -134,7 +134,11 @@ export async function POST(request: NextRequest) {
 		const validatedResult: CategorizationResult = {
 			categories:
 				result.categories?.map(
-					(cat: any): CommentGroup => ({
+					(cat: {
+						name: string;
+						description: string;
+						icon: string;
+					}): CommentGroup => ({
 						id: categoryNameToId[cat.name.trim()],
 						video_id: comments[0].video_id,
 						created_at: new Date()

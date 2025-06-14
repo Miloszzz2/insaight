@@ -1,8 +1,6 @@
 "use client";
 
 import {
-	Sidebar,
-	SidebarHeader,
 	SidebarContent,
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -10,7 +8,6 @@ import {
 	SidebarMenu,
 	SidebarMenuItem,
 	SidebarMenuButton,
-	SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { CommentGroup } from "@/types/db/comment-group";
@@ -22,17 +19,11 @@ import { AnalysisData } from "@/types/analysis/analysis-data";
 import { MessageSquare } from "lucide-react";
 
 interface AnalysisSidebarClientProps {
-	user: {
-		name: string | null | undefined;
-		username: string | null | undefined;
-		avatar_url: string | null | undefined;
-	};
 	analysisData: AnalysisData;
 	isAnalyzed: boolean;
 }
 
 export function AnalysisSidebarClient({
-	user,
 	analysisData,
 	isAnalyzed,
 }: AnalysisSidebarClientProps) {

@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
 	try {
 		const supabase = await createClient();
 		const session = supabase.auth.getSession();

@@ -12,10 +12,9 @@ import {
 	AnalyzedCommentsApiResponse,
 } from "@/types/api/ai/sentiment-analysis";
 
-const SentimentAnalyzer = natural.SentimentAnalyzer;
+// Use standard analyzer instead of parallel version
 const stemmer = natural.PorterStemmer;
-const analyzer = new SentimentAnalyzer("English", stemmer, "afinn");
-
+const analyzer = new natural.SentimentAnalyzer("English", stemmer, "afinn");
 const tokenizer = new natural.WordTokenizer();
 
 function analyzeSentimentWithNatural(text: string): SentimentResult {

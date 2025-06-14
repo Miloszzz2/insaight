@@ -112,8 +112,8 @@ export function HeroSection() {
 								style={{ animationDelay: "0.8s" }}
 							>
 								We team up with creators to unlock cutting-edge insights
-								from YouTube comments. Let's build something amazing
-								together.
+								from YouTube comments. Let&apos;s build something
+								amazing together.
 							</p>
 						</div>
 

@@ -39,7 +39,6 @@ import { useAnalysis } from "@/app/analysis/[id]/context/analysis-context-provid
 import { fetchComments } from "@/app/analysis/[id]/actions/fetch-comments";
 import { analyzeSentiment } from "@/app/analysis/[id]/actions/analyze-sentiment";
 import { categorizeComments } from "@/app/analysis/[id]/actions/categorize-comments";
-import { redirect } from "next/navigation";
 
 export default function AnalysisLoading({ id }: { id: string }) {
 	const {
@@ -92,7 +91,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 				const categorizedData: CategorizationResult =
 					await categorizeComments(comments);
 
-				setAnalysisData((prev) => ({
+				setAnalysisData(() => ({
 					sentimentSummary: {
 						positive: categorizedData.overallSummary.sentiment.positive,
 						negative: categorizedData.overallSummary.sentiment.negative,
@@ -112,12 +111,17 @@ export default function AnalysisLoading({ id }: { id: string }) {
 		setAnalysisStep(0);
 		setError(null);
 		try {
-			let currentData: any = null;
+			let currentData: Comment[] = [];
 			for (let i = 0; i < analysisSteps.length; i++) {
 				setAnalysisStep(i);
 				try {
 					// Execute the actual API call for this step
-					currentData = await analysisSteps[i].action(currentData);
+					if (i === 0) {
+						// The first step does not require input
+						currentData = await analysisSteps[i].action([]);
+					} else {
+						currentData = await analysisSteps[i].action(currentData);
+					}
 				} catch (stepError) {
 					console.error(`Error in step ${i}:`, stepError);
 					toast.error(`Failed at step: ${analysisSteps[i].label}`);
@@ -175,7 +179,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 						<Card className="max-w-2xl mx-auto">
 							<CardHeader>
 								<CardTitle className="text-xl">
-									What you'll get:
+									What you&apos;ll get:
 								</CardTitle>
 							</CardHeader>
 							<CardContent>

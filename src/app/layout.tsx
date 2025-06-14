@@ -4,7 +4,10 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const inter = Inter({ weight: ["400", "500", "600", "700"] });
+const inter = Inter({
+	weight: ["400", "500", "600", "700"],
+	subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
 	title: "InsAight - AI-Powered YouTube Comment Analysis",

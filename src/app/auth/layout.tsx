@@ -63,7 +63,7 @@ export default async function AuthLayout() {
 
 						<div className="mt-6 text-center">
 							<p className="text-gray-400 text-sm">
-								Don't have an account?{" "}
+								Don&apos;t have an account?{" "}
 								<Link
 									href="/auth/signup"
 									className="text-violet-400 hover:text-violet-300 font-medium"
@@ -78,7 +78,7 @@ export default async function AuthLayout() {
 				{/* Footer */}
 				<div className="mt-12 text-center text-xs text-gray-500">
 					<p>
-						By continuing, you agree to InsAight's{" "}
+						By continuing, you agree to InsAight&apos;s{" "}
 						<Link
 							href="/terms"
 							className="text-gray-400 hover:text-white"
@@ -108,12 +108,12 @@ export default async function AuthLayout() {
 				<div className="max-w-lg relative z-10">
 					{/* Quote Mark */}
 					<div className="text-9xl font-serif text-gray-700 absolute -top-20 -left-4 opacity-30">
-						"
+						&quot;
 					</div>
 
 					<blockquote className="text-2xl text-white leading-relaxed mb-8">
 						Now things are starting to get interesting! YouTube comments
-						have always been a goldmine of feedback, but they're
+						have always been a goldmine of feedback, but they&apos;re
 						overwhelming to process manually. InsAight is the perfect
 						solution for creators who want to understand their audience
 						better.

@@ -19,7 +19,7 @@ export async function fetchVideos({
 			return [];
 		}
 
-		const { data: userData, error: userError } = await supabase
+		const { error: userError } = await supabase
 			.from("users")
 			.select("upload_playlist_id")
 			.eq("id", userId);
@@ -29,7 +29,7 @@ export async function fetchVideos({
 			return [];
 		}
 
-		const uploadPlaylistId = userData && userData[0]?.upload_playlist_id;
+		//const uploadPlaylistId = userData && userData[0]?.upload_playlist_id;
 
 		if (refetchFromApi) {
 			if (!token) {
@@ -106,7 +106,6 @@ export async function fetchVideos({
 			console.error("Error fetching saved videos:", selectVideosError);
 			return [];
 		}
-		console.log(videos);
 		return videos;
 	} catch (error) {
 		console.error("Unexpected error in fetchVideos:", error);

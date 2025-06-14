@@ -15,7 +15,13 @@ export async function signInWithGoogle() {
 			scopes: "https://www.googleapis.com/auth/youtube.readonly",
 		},
 	});
-	// TODO add error handle here
+
+	// Handle error
+	if (error) {
+		console.error("Google sign-in error:", error.message);
+		throw new Error("Failed to sign in with Google: " + error.message);
+	}
+
 	if (data.url) {
 		redirect(data.url);
 	}

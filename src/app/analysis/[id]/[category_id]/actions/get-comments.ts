@@ -12,5 +12,11 @@ export async function getCommentsFromGroup(
 		.select()
 		.eq("category_id", category_id);
 
+	if (commentsSelectError) {
+		throw new Error(
+			`Failed to fetch comments: ${commentsSelectError.message}`
+		);
+	}
+
 	return comments || [];
 }

@@ -37,6 +37,21 @@ export default async function getAnalysisData(
 			.select()
 			.eq("youtube_video_id", video_id)
 			.single();
+		if (selectCommentsError) {
+			throw new Error(
+				"Error fetching comments: " + selectCommentsError.message
+			);
+		}
+		if (commentGroupsError) {
+			throw new Error(
+				"Error fetching comment groups: " + commentGroupsError.message
+			);
+		}
+		if (analysisDayaError) {
+			throw new Error(
+				"Error fetching analysis data: " + analysisDayaError.message
+			);
+		}
 		if (commentsData && commentGroupsData && analysisDataDb) {
 			const analysisData: AnalysisData = {
 				comments: commentsData,

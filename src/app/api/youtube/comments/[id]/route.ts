@@ -1,7 +1,7 @@
 import { Comment } from "@/types/db/comment";
 import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(
 	request: Request,

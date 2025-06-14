@@ -8,6 +8,6 @@ export async function fetchComments(videoId: string) {
 	try {
 		return await commentsData.json();
 	} catch (error) {
-		throw new Error("Invalid JSON response");
+		throw new Error("Invalid JSON response" + error);
 	}
 }
