@@ -2,7 +2,8 @@
 
 An AI-powered web application that fetches comments from your YouTube videos and automatically categorizes them by **topic** and **sentiment** – helping content creators quickly understand feedback and improve their content.
 
-![obraz](https://github.com/user-attachments/assets/a4d5fd76-bce7-45fb-a98c-64f1cf8299bd)
+![obraz](https://github.com/user-attachments/assets/c3087952-f31b-4a3e-b8d7-73aa6ab5379f)
+
  <!-- Replace with actual image if available -->
 
 ---
