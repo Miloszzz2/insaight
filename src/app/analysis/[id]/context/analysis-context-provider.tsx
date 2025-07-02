@@ -13,6 +13,8 @@ type AnalysisContextType = {
 	setError: React.Dispatch<React.SetStateAction<string | null>>;
 	analysisData: AnalysisData;
 	setAnalysisData: React.Dispatch<React.SetStateAction<AnalysisData>>;
+	numComments: number;
+	setNumComments: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const AnalysisContext = createContext<AnalysisContextType | undefined>(
@@ -30,6 +32,7 @@ export function AnalysisContextProvider({ children }: { children: ReactNode }) {
 		sentimentSummary: { positive: 0, neutral: 0, negative: 0 },
 		aiSummary: "",
 	});
+	const [numComments, setNumComments] = useState<number>(100);
 
 	return (
 		<AnalysisContext.Provider
@@ -44,6 +47,8 @@ export function AnalysisContextProvider({ children }: { children: ReactNode }) {
 				setError,
 				analysisData,
 				setAnalysisData,
+				numComments,
+				setNumComments,
 			}}
 		>
 			{children}

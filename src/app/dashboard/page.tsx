@@ -34,7 +34,7 @@ export default async function DashboardPage() {
 						variant="secondary"
 						className="bg-violet-100 text-violet-700 text-sm"
 					>
-						{(await videos).length}
+						{(await videos).videos.length}
 					</Badge>
 				</header>
 				{/* Main Content */}

@@ -10,7 +10,6 @@ export default async function Page({
 	params: Promise<{ category_id: string }>;
 }) {
 	const { category_id } = await params;
-	console.log(category_id);
 	const comments = getCommentsFromGroup(category_id);
 	const category_name = getCategoryName(category_id);
 	return (

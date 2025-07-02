@@ -8,7 +8,7 @@ export async function fetchVideos({
 	refetchFromApi = false,
 }: {
 	refetchFromApi?: boolean;
-} = {}): Promise<Video[]> {
+} = {}): Promise<{ videos: Video[]; reauth: boolean }> {
 	try {
 		const supabase = await createClient();
 		const session = await supabase.auth.getSession();
@@ -16,7 +16,7 @@ export async function fetchVideos({
 		const userId = (await supabase.auth.getUser()).data.user?.id;
 
 		if (!userId) {
-			return [];
+			return { videos: [], reauth: true };
 		}
 
 		const { error: userError } = await supabase
@@ -26,15 +26,14 @@ export async function fetchVideos({
 
 		if (userError) {
 			console.error("Error fetching user data:", userError);
-			return [];
+			return { videos: [], reauth: false };
 		}
 
 		//const uploadPlaylistId = userData && userData[0]?.upload_playlist_id;
 
 		if (refetchFromApi) {
 			if (!token) {
-				toast.error("Reauth needed. Your auth token expired");
-				return [];
+				return { videos: [], reauth: true };
 			}
 
 			try {
@@ -50,13 +49,13 @@ export async function fetchVideos({
 				if (!videosResponse.ok) {
 					const errorData = await videosResponse.json();
 					console.error("YouTube API error:", errorData);
-					return [];
+					return { videos: [], reauth: false };
 				}
 
 				const videoInfo = await videosResponse.json();
 
 				if (!videoInfo.items?.length) {
-					return [];
+					return { videos: [], reauth: false };
 				}
 
 				const videos_to_upload = videoInfo.items.map((item: any) => ({
@@ -88,11 +87,11 @@ export async function fetchVideos({
 
 				if (upsertError) {
 					console.error("Error upserting videos:", upsertError);
-					return [];
+					return { videos: [], reauth: false };
 				}
 			} catch (apiError) {
 				console.error("Error in YouTube API call:", apiError);
-				return [];
+				return { videos: [], reauth: false };
 			}
 		}
 
@@ -104,11 +103,14 @@ export async function fetchVideos({
 
 		if (selectVideosError) {
 			console.error("Error fetching saved videos:", selectVideosError);
-			return [];
+			return { videos: [], reauth: false };
 		}
-		return videos;
-	} catch (error) {
+		return { videos: videos ?? [], reauth: false };
+	} catch (error: any) {
+		if (error?.message?.includes("Reauthentication is required")) {
+			return { videos: [], reauth: true };
+		}
 		console.error("Unexpected error in fetchVideos:", error);
-		return [];
+		return { videos: [], reauth: false };
 	}
 }

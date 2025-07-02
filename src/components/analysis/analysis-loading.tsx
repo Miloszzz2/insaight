@@ -52,6 +52,8 @@ export default function AnalysisLoading({ id }: { id: string }) {
 		analysisStep,
 		error,
 		isAnalyzing,
+		setNumComments,
+		numComments
 	} = useAnalysis();
 
 	const analysisSteps = [
@@ -59,7 +61,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 			label: "Fetching comments from YouTube",
 			icon: Play,
 			action: async () => {
-				const comments = await fetchComments(id);
+				const comments = await fetchComments(numComments, id);
 				setAnalysisData((prev) => ({ ...prev, comments }));
 				return comments;
 			},
@@ -219,7 +221,24 @@ export default function AnalysisLoading({ id }: { id: string }) {
 								</div>
 							</CardContent>
 						</Card>
-
+						<div className="flex flex-col items-center space-y-2">
+							<label htmlFor="num-comments" className="text-sm text-gray-700 font-medium">
+								Number of comments to analyze
+							</label>
+							<Input
+								id="num-comments"
+								type="number"
+								min={50}
+								max={800}
+								step={50}
+								defaultValue={50}
+								className="w-32 text-center"
+								onChange={(e) => {
+									const value = parseInt(e.target.value, 10);
+									setNumComments(value)
+								}}
+							/>
+						</div>
 						<Button
 							size="lg"
 							onClick={startAnalysis}
@@ -262,13 +281,12 @@ export default function AnalysisLoading({ id }: { id: string }) {
 												className="flex items-center space-x-3"
 											>
 												<div
-													className={`w-8 h-8 rounded-full flex items-center justify-center ${
-														isCompleted
-															? "bg-green-100"
-															: isActive
+													className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted
+														? "bg-green-100"
+														: isActive
 															? "bg-violet-100"
 															: "bg-gray-100"
-													}`}
+														}`}
 												>
 													{isCompleted ? (
 														<CheckCircle className="w-4 h-4 text-green-600" />
@@ -276,22 +294,20 @@ export default function AnalysisLoading({ id }: { id: string }) {
 														<Loader2 className="w-4 h-4 text-violet-600 animate-spin" />
 													) : (
 														<IconComponent
-															className={`w-4 h-4 ${
-																isUpcoming
-																	? "text-gray-400"
-																	: "text-violet-600"
-															}`}
+															className={`w-4 h-4 ${isUpcoming
+																? "text-gray-400"
+																: "text-violet-600"
+																}`}
 														/>
 													)}
 												</div>
 												<span
-													className={`text-sm ${
-														isCompleted
-															? "text-green-600"
-															: isActive
+													className={`text-sm ${isCompleted
+														? "text-green-600"
+														: isActive
 															? "text-violet-600 font-medium"
 															: "text-gray-400"
-													}`}
+														}`}
 												>
 													{step.label}
 												</span>
@@ -330,7 +346,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 										{Math.round(
 											(analysisData.sentimentSummary.positive /
 												analysisData.comments.length) *
-												100
+											100
 										)}
 										%
 									</div>
@@ -360,7 +376,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 										{Math.round(
 											(analysisData.sentimentSummary.neutral /
 												analysisData.comments.length) *
-												100
+											100
 										)}
 										%
 									</div>
@@ -390,7 +406,7 @@ export default function AnalysisLoading({ id }: { id: string }) {
 										{Math.round(
 											(analysisData.sentimentSummary.negative /
 												analysisData.comments.length) *
-												100
+											100
 										)}
 										%
 									</div>

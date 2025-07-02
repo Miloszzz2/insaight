@@ -13,17 +13,17 @@ import { parseISODuration } from "@/utils/dashboard/parse-iso-duration";
 import { fetchVideos } from "@/app/dashboard/actions/fetch-videos";
 import { VideoSkeleton } from "./video-skeleton";
 
-export default function VideosGrid({ videos }: { videos: Promise<Video[]> }) {
-	const [allVideos, setAllVideos] = useState(use(videos));
+export default function VideosGrid({ videos }: { videos: Promise<{ videos: Video[]; reauth: boolean }> }) {
+	const [allVideos, setAllVideos] = useState(use(videos).videos);
 	const [isPending, startTransition] = useTransition();
-
+	const reauthNeeded = use(videos).reauth
 	if (!allVideos) return "No Videos";
-
+	console.log(reauthNeeded)
 	const handleRefresh = () => {
 		startTransition(async () => {
 			const result = await fetchVideos({ refetchFromApi: true });
-			if (result.length > 0) {
-				setAllVideos(result);
+			if (result.videos.length > 0) {
+				setAllVideos(result.videos);
 			}
 		});
 	};
@@ -31,6 +31,26 @@ export default function VideosGrid({ videos }: { videos: Promise<Video[]> }) {
 	const skeletons = Array(allVideos.length)
 		.fill(0)
 		.map((_, i) => <VideoSkeleton key={`skeleton-${i}`} />);
+
+	if (reauthNeeded) {
+		return (
+			<div className="flex flex-col items-center justify-center h-screen">
+				<h1 className="text-2xl font-bold mb-4 text-red-600">
+					Session Expired
+				</h1>
+				<p className="mb-6 text-gray-700">
+					Your session has expired. Please{" "}
+					<a
+						href="/auth"
+						className="text-violet-600 underline"
+					>
+						log in again
+					</a>{" "}
+					to continue.
+				</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-2 py-2 flex flex-col">

@@ -323,6 +323,7 @@ export async function POST(request: NextRequest) {
 				{ status: 500 }
 			);
 		}
+
 		return NextResponse.json(validatedResult, {
 			headers: {
 				"Content-Type": "application/json",
