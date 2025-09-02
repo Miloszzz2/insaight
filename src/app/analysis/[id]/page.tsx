@@ -11,7 +11,6 @@ export default async function AnalysisPage({
 	const { id } = await params;
 
 	const commentsFetched = await getCommentsFetched(id);
-	console.log(commentsFetched);
 	return (
 		<>
 			<AnalysisSidebar videoId={id} />

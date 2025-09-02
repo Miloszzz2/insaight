@@ -26,6 +26,7 @@ const testimonials = [
 			"InsAight completely transformed how I understand my audience. The sentiment analysis helped me identify what content resonates most with my viewers.",
 		category: "Content Strategy",
 		verified: true,
+		likes: 42,
 	},
 	{
 		id: 2,
@@ -36,6 +37,7 @@ const testimonials = [
 			"The AI categorization is incredible. It automatically groups feedback about editing, audio, and content ideas. Saves me hours of manual work every week.",
 		category: "Time Saving",
 		verified: true,
+		likes: 38,
 	},
 	{
 		id: 3,
@@ -46,6 +48,7 @@ const testimonials = [
 			"I discovered so many content ideas from the suggestions category. My audience was literally telling me what they wanted to see next!",
 		category: "Content Ideas",
 		verified: true,
+		likes: 29,
 	},
 	{
 		id: 4,
@@ -56,6 +59,7 @@ const testimonials = [
 			"The sentiment tracking helped me understand which videos perform best emotionally. Now I can replicate that success in future content.",
 		category: "Performance",
 		verified: true,
+		likes: 45,
 	},
 	{
 		id: 5,
@@ -66,6 +70,7 @@ const testimonials = [
 			"InsAight's analysis revealed that my audience loved my cooking tips but wanted more behind-the-scenes content. Game changer for my channel strategy.",
 		category: "Audience Insights",
 		verified: true,
+		likes: 33,
 	},
 	{
 		id: 6,
@@ -76,6 +81,7 @@ const testimonials = [
 			"The negative sentiment analysis helped me identify and address concerns quickly. My community engagement has improved dramatically since using InsAight.",
 		category: "Community",
 		verified: true,
+		likes: 51,
 	},
 	{
 		id: 7,
@@ -86,6 +92,7 @@ const testimonials = [
 			"I love how it breaks down feedback by category. The audio quality insights helped me invest in better equipment that my audience actually wanted.",
 		category: "Equipment",
 		verified: true,
+		likes: 27,
 	},
 	{
 		id: 8,
@@ -96,6 +103,7 @@ const testimonials = [
 			"InsAight showed me that viewers loved my editing style but wanted longer videos. The data-driven insights helped me optimize my content perfectly.",
 		category: "Optimization",
 		verified: true,
+		likes: 36,
 	},
 	{
 		id: 9,
@@ -106,6 +114,7 @@ const testimonials = [
 			"The AI summary feature gives me a quick overview of all feedback. I can spot trends and patterns in minutes instead of reading hundreds of comments.",
 		category: "Efficiency",
 		verified: true,
+		likes: 44,
 	},
 ];
 
@@ -223,7 +232,7 @@ export function CommentTestimonials() {
 									<div className="flex items-center space-x-1 text-gray-400">
 										<ThumbsUp className="w-3 h-3" />
 										<span className="text-xs">
-											{Math.floor(Math.random() * 50) + 10}
+											{testimonial.likes}
 										</span>
 									</div>
 								</div>
@@ -287,7 +296,7 @@ export function CommentTestimonials() {
 									<div className="flex items-center space-x-1 text-gray-400">
 										<ThumbsUp className="w-3 h-3" />
 										<span className="text-xs">
-											{Math.floor(Math.random() * 50) + 10}
+											{testimonial.likes}
 										</span>
 									</div>
 								</div>
@@ -354,7 +363,7 @@ export function CommentTestimonials() {
 									<div className="flex items-center space-x-1 text-gray-400">
 										<ThumbsUp className="w-3 h-3" />
 										<span className="text-xs">
-											{Math.floor(Math.random() * 50) + 10}
+											{testimonial.likes}
 										</span>
 									</div>
 								</div>

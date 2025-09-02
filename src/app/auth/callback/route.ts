@@ -22,7 +22,6 @@ export async function GET(request: Request) {
 
 		if (!error && user) {
 			try {
-				console.log(user.id);
 				await upsertUser({
 					id: user.id,
 					email: user.email ?? "",
@@ -30,7 +29,10 @@ export async function GET(request: Request) {
 					created_at: user.created_at,
 				});
 			} catch (error) {
-				console.error("Error saving user:", error);
+				// Log error only in development
+				if (process.env.NODE_ENV === 'development') {
+					console.error("Error saving user:", error);
+				}
 			}
 
 			const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { use, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Eye, Calendar, RefreshCw } from "lucide-react";
 
@@ -12,18 +13,35 @@ import { Video } from "@/types/db/video";
 import { parseISODuration } from "@/utils/dashboard/parse-iso-duration";
 import { fetchVideos } from "@/app/dashboard/actions/fetch-videos";
 import { VideoSkeleton } from "./video-skeleton";
+import signOut from "@/app/dashboard/actions/sign-out";
 
-export default function VideosGrid({ videos }: { videos: Promise<{ videos: Video[]; reauth: boolean }> }) {
-	const [allVideos, setAllVideos] = useState(use(videos).videos);
+export default function VideosGrid({ 
+	initialVideos, 
+	onVideoCountChange 
+}: { 
+	initialVideos: { videos: Video[]; reauth: boolean };
+	onVideoCountChange?: (count: number) => void;
+}) {
+	const [allVideos, setAllVideos] = useState(initialVideos.videos);
 	const [isPending, startTransition] = useTransition();
-	const reauthNeeded = use(videos).reauth
+	const reauthNeeded = initialVideos.reauth
 	if (!allVideos) return "No Videos";
-	console.log(reauthNeeded)
 	const handleRefresh = () => {
 		startTransition(async () => {
 			const result = await fetchVideos({ refetchFromApi: true });
-			if (result.videos.length > 0) {
+			if (result.reauth) {
+				toast.error("Session expired. Please log in again to refresh videos.", {
+					action: {
+						label: "Login",
+						onClick: async () => {
+							await signOut();
+						}
+					}
+				});
+			} else {
 				setAllVideos(result.videos);
+				onVideoCountChange?.(result.videos.length);
+				toast.success("Videos refreshed successfully!");
 			}
 		});
 	};

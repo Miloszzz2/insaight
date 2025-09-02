@@ -16,14 +16,18 @@ async function getChannelDetails() {
 			}
 		);
 		const channelDetails = await channelDetailsData.json();
-		console.log(channelDetails.items[0].snippet);
 		return NextResponse.json(channelDetails);
 	} catch (error) {
-		console.error("Error fetching channelId:", error);
+		// Log error only in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Error fetching channelId:", error);
+		}
 		return NextResponse.json(
 			{
-				error: "Error fetching channelId",
-				details: error instanceof Error ? error.message : "Unknown error",
+				error: "Error fetching channel details",
+				...(process.env.NODE_ENV === 'development' && {
+					details: error instanceof Error ? error.message : "Unknown error",
+				}),
 			},
 			{
 				status: 500,
@@ -58,7 +62,10 @@ export async function upsertUser(user: {
 	});
 
 	if (upsertUsersError) {
-		console.error("Error upserting user:", upsertUsersError);
+		// Log error only in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Error upserting user:", upsertUsersError);
+		}
 		throw upsertUsersError;
 	}
 }

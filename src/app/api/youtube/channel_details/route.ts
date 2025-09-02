@@ -15,14 +15,44 @@ export async function GET() {
 				},
 			}
 		);
+		
+		if (!channelDetailsData.ok) {
+			let errorData;
+			try {
+				errorData = await channelDetailsData.json();
+			} catch {
+				errorData = { error: { message: "Invalid response from YouTube API" } };
+			}
+			
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("YouTube API error:", errorData);
+			}
+			
+			return NextResponse.json(
+				{
+					error: "Failed to fetch channel details",
+					...(process.env.NODE_ENV === 'development' && {
+						details: errorData.error?.message || "YouTube API error",
+					}),
+				},
+				{ status: channelDetailsData.status }
+			);
+		}
+		
 		const channelDetails = await channelDetailsData.json();
 		return NextResponse.json(channelDetails);
 	} catch (error) {
-		console.error("Error fetching channelId:", error);
+		// Log error only in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Error fetching channelId:", error);
+		}
 		return NextResponse.json(
 			{
-				error: "Error fetching channelId",
-				details: error instanceof Error ? error.message : "Unknown error",
+				error: "Error fetching channel details",
+				...(process.env.NODE_ENV === 'development' && {
+					details: error instanceof Error ? error.message : "Unknown error",
+				}),
 			},
 			{
 				status: 500,

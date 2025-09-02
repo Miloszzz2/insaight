@@ -14,8 +14,11 @@ export default async function signOut() {
 	if (user) {
 		const { error: signOutError } = await supabase.auth.signOut();
 		if (signOutError) {
-			console.log(signOutError);
-			toast.error(signOutError.message);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.log(signOutError);
+			}
+			toast.error("Sign out failed");
 			redirect("/auth");
 		}
 	}

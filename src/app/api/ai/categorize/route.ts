@@ -9,10 +9,78 @@ import { Analysis } from "@/types/db/analysis";
 
 export async function POST(request: NextRequest) {
 	try {
-		const { comments }: { comments: Comment[] } = await request.json();
+		// Validate request body
+		let requestBody;
+		try {
+			requestBody = await request.json();
+		} catch {
+			return NextResponse.json(
+				{ error: "Invalid JSON in request body" },
+				{ status: 400 }
+			);
+		}
+
+		const { comments } = requestBody;
+
+		// Validate comments array
+		if (!comments) {
+			return NextResponse.json(
+				{ error: "Comments array is required" },
+				{ status: 400 }
+			);
+		}
+
+		if (!Array.isArray(comments)) {
+			return NextResponse.json(
+				{ error: "Comments must be an array" },
+				{ status: 400 }
+			);
+		}
+
+		if (comments.length === 0) {
+			return NextResponse.json(
+				{ error: "Comments array cannot be empty" },
+				{ status: 400 }
+			);
+		}
+
+		if (comments.length > 1000) {
+			return NextResponse.json(
+				{ error: "Too many comments (max 1000)" },
+				{ status: 400 }
+			);
+		}
+
+		// Validate each comment structure
+		for (let i = 0; i < comments.length; i++) {
+			const comment = comments[i];
+			if (!comment || typeof comment !== 'object') {
+				return NextResponse.json(
+					{ error: `Invalid comment at index ${i}` },
+					{ status: 400 }
+				);
+			}
+
+			if (!comment.text || typeof comment.text !== 'string' || comment.text.trim().length === 0) {
+				return NextResponse.json(
+					{ error: `Comment at index ${i} must have valid text` },
+					{ status: 400 }
+				);
+			}
+
+			if (comment.text.length > 10000) {
+				return NextResponse.json(
+					{ error: `Comment at index ${i} text is too long (max 10000 characters)` },
+					{ status: 400 }
+				);
+			}
+		}
 
 		if (!process.env.GEMINI_API_KEY) {
-			throw new Error("GEMINI_API_KEY environment variable is required");
+			return NextResponse.json(
+				{ error: "AI service temporarily unavailable" },
+				{ status: 503 }
+			);
 		}
 
 		const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });

@@ -2,7 +2,6 @@
 import { Video } from "@/types/db/video";
 import { createClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
-import { toast } from "sonner";
 
 export async function fetchVideos({
 	refetchFromApi = false,
@@ -11,8 +10,8 @@ export async function fetchVideos({
 } = {}): Promise<{ videos: Video[]; reauth: boolean }> {
 	try {
 		const supabase = await createClient();
-		const session = await supabase.auth.getSession();
-		const token = session.data.session?.provider_token;
+		const session = supabase.auth.getSession();
+		const token = (await session).data.session?.provider_token;
 		const userId = (await supabase.auth.getUser()).data.user?.id;
 
 		if (!userId) {
@@ -25,7 +24,10 @@ export async function fetchVideos({
 			.eq("id", userId);
 
 		if (userError) {
-			console.error("Error fetching user data:", userError);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("Error fetching user data:", userError);
+			}
 			return { videos: [], reauth: false };
 		}
 
@@ -47,8 +49,17 @@ export async function fetchVideos({
 				);
 
 				if (!videosResponse.ok) {
-					const errorData = await videosResponse.json();
-					console.error("YouTube API error:", errorData);
+					let errorData;
+					try {
+						errorData = await videosResponse.json();
+					} catch {
+						errorData = { error: { message: "Invalid response from YouTube API" } };
+					}
+					
+					// Log error only in development
+					if (process.env.NODE_ENV === 'development') {
+						console.error("YouTube API error:", errorData);
+					}
 					return { videos: [], reauth: false };
 				}
 
@@ -86,11 +97,17 @@ export async function fetchVideos({
 					});
 
 				if (upsertError) {
-					console.error("Error upserting videos:", upsertError);
+					// Log error only in development
+					if (process.env.NODE_ENV === 'development') {
+						console.error("Error upserting videos:", upsertError);
+					}
 					return { videos: [], reauth: false };
 				}
 			} catch (apiError) {
-				console.error("Error in YouTube API call:", apiError);
+				// Log error only in development
+				if (process.env.NODE_ENV === 'development') {
+					console.error("Error in YouTube API call:", apiError);
+				}
 				return { videos: [], reauth: false };
 			}
 		}
@@ -102,7 +119,10 @@ export async function fetchVideos({
 			.eq("user_id", userId);
 
 		if (selectVideosError) {
-			console.error("Error fetching saved videos:", selectVideosError);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("Error fetching saved videos:", selectVideosError);
+			}
 			return { videos: [], reauth: false };
 		}
 		return { videos: videos ?? [], reauth: false };
@@ -110,7 +130,10 @@ export async function fetchVideos({
 		if (error?.message?.includes("Reauthentication is required")) {
 			return { videos: [], reauth: true };
 		}
-		console.error("Unexpected error in fetchVideos:", error);
+		// Log error only in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Unexpected error in fetchVideos:", error);
+		}
 		return { videos: [], reauth: false };
 	}
 }

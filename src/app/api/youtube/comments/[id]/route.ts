@@ -9,8 +9,52 @@ export async function POST(
 ) {
 	try {
 		const { id } = await params;
+		
+		// Validate video ID parameter
+		if (!id || typeof id !== 'string' || id.trim().length === 0) {
+			return NextResponse.json(
+				{ error: "Invalid video ID parameter" },
+				{ status: 400 }
+			);
+		}
+
+		// Validate YouTube video ID format (11 characters, alphanumeric + - _)
+		if (!/^[a-zA-Z0-9_-]{11}$/.test(id)) {
+			return NextResponse.json(
+				{ error: "Invalid YouTube video ID format" },
+				{ status: 400 }
+			);
+		}
+
 		const supabase = await createClient();
-		const { numComments } = await request.json();
+		
+		// Parse and validate request body
+		let requestBody;
+		try {
+			requestBody = await request.json();
+		} catch {
+			return NextResponse.json(
+				{ error: "Invalid JSON in request body" },
+				{ status: 400 }
+			);
+		}
+
+		const { numComments } = requestBody;
+
+		// Validate numComments parameter
+		if (numComments === undefined || numComments === null) {
+			return NextResponse.json(
+				{ error: "numComments parameter is required" },
+				{ status: 400 }
+			);
+		}
+
+		if (!Number.isInteger(numComments) || numComments < 1 || numComments > 10000) {
+			return NextResponse.json(
+				{ error: "numComments must be an integer between 1 and 10000" },
+				{ status: 400 }
+			);
+		}
 
 		const maxResults = 100;
 		let fetched = 0;
@@ -38,7 +82,6 @@ export async function POST(
 			nextPageToken = data.nextPageToken;
 			if (!nextPageToken || !data.items || data.items.length === 0) break;
 		}
-		console.log(allItems.length);
 		const { data: video_id } = await supabase
 			.from("videos")
 			.select("id")
@@ -67,11 +110,18 @@ export async function POST(
 
 		return NextResponse.json(comments ?? []);
 	} catch (error) {
-		console.error("Error fetching comments:", error);
+		// Log error for debugging (consider using structured logging in production)
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Error fetching comments:", error);
+		}
+		
 		return NextResponse.json(
 			{
 				error: "Failed to fetch comments",
-				details: error instanceof Error ? error.message : String(error),
+				// Only include error details in development
+				...(process.env.NODE_ENV === 'development' && {
+					details: error instanceof Error ? error.message : String(error),
+				}),
 			},
 			{ status: 500 }
 		);

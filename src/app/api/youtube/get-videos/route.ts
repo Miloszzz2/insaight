@@ -23,11 +23,16 @@ export async function GET() {
 			.eq("id", userId);
 
 		if (userError) {
-			console.error("Error fetching user data:", userError);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("Error fetching user data:", userError);
+			}
 			return NextResponse.json(
 				{
 					error: "Failed to fetch user data",
-					details: userError.message,
+					...(process.env.NODE_ENV === 'development' && {
+						details: userError.message,
+					}),
 				},
 				{ status: 500 }
 			);
@@ -59,12 +64,25 @@ export async function GET() {
 		);
 
 		if (!videosResponse.ok) {
-			const errorData = await videosResponse.json();
-			console.error("YouTube API error:", errorData);
+			let errorData;
+			try {
+				errorData = await videosResponse.json();
+			} catch {
+				errorData = { error: { message: "Invalid response from YouTube API" } };
+			}
+			
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("YouTube API error:", errorData);
+			}
+			
 			return NextResponse.json(
 				{
 					error: "Failed to fetch videos from YouTube",
-					details: errorData.error?.message || "YouTube API error",
+					// Sanitize error details for production
+					...(process.env.NODE_ENV === 'development' && {
+						details: errorData.error?.message || "YouTube API error",
+					}),
 				},
 				{ status: videosResponse.status }
 			);
@@ -108,11 +126,16 @@ export async function GET() {
 			});
 
 		if (upsertVideosError) {
-			console.error("Error upserting videos:", upsertVideosError);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("Error upserting videos:", upsertVideosError);
+			}
 			return NextResponse.json(
 				{
 					error: "Failed to save videos to database",
-					details: upsertVideosError.message,
+					...(process.env.NODE_ENV === 'development' && {
+						details: upsertVideosError.message,
+					}),
 				},
 				{ status: 500 }
 			);
@@ -124,11 +147,16 @@ export async function GET() {
 			.eq("user_id", userId);
 
 		if (selectVideosError) {
-			console.error("Error fetching saved videos:", selectVideosError);
+			// Log error only in development
+			if (process.env.NODE_ENV === 'development') {
+				console.error("Error fetching saved videos:", selectVideosError);
+			}
 			return NextResponse.json(
 				{
 					error: "Failed to fetch saved videos",
-					details: selectVideosError.message,
+					...(process.env.NODE_ENV === 'development' && {
+						details: selectVideosError.message,
+					}),
 				},
 				{ status: 500 }
 			);
@@ -136,11 +164,16 @@ export async function GET() {
 
 		return NextResponse.json(videos || []);
 	} catch (error) {
-		console.error("Unexpected error in get-videos:", error);
+		// Log error only in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error("Unexpected error in get-videos:", error);
+		}
 		return NextResponse.json(
 			{
 				error: "Internal server error",
-				details: error instanceof Error ? error.message : "Unknown error",
+				...(process.env.NODE_ENV === 'development' && {
+					details: error instanceof Error ? error.message : "Unknown error",
+				}),
 			},
 			{ status: 500 }
 		);
